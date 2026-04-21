@@ -1,0 +1,74 @@
+{
+  "nav": {
+    "home": "Home",
+    "colleges": "Colleges",
+    "courses": "Courses",
+    "exams": "Exams",
+    "articles": "News & Articles",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  },
+  "home": {
+    "hero_title": "Find Your Dream College",
+    "hero_subtitle": "Search from thousands of colleges across India. Apply with one form.",
+    "search_placeholder": "Search colleges, courses, exams…",
+    "featured_colleges": "Featured Colleges",
+    "popular_courses": "Popular Courses",
+    "top_exams": "Top Exams",
+    "latest_articles": "Latest Articles"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Register",
+    "email": "Email",
+    "password": "Password",
+    "phone": "Phone number",
+    "name": "Full name",
+    "otp": "Enter OTP",
+    "otp_sent": "OTP sent to your WhatsApp",
+    "otp_verify": "Verify OTP",
+    "resend_otp": "Resend OTP",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "consent_application": "I consent to GyanSanchaar processing my data to handle college applications",
+    "consent_communication": "I consent to receiving application status updates by WhatsApp and email",
+    "consent_marketing": "I'd like to receive college recommendations and offers (optional)",
+    "consent_analytics": "Help improve the platform with anonymised usage data (optional)"
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "complete_profile": "Complete your application form to start applying to colleges",
+    "applications": "My Applications",
+    "documents": "Documents",
+    "profile": "Profile",
+    "privacy": "Privacy & Data",
+    "no_applications": "You haven't applied to any college yet",
+    "browse_colleges": "Browse Colleges"
+  },
+  "minor": {
+    "banner_title": "One quick step",
+    "banner_desc": "Indian law requires your parent's consent before you can submit college applications.",
+    "verify_now": "Verify now (2 min)",
+    "verified": "Parent verified ✓"
+  },
+  "grievance": {
+    "title": "File a Grievance",
+    "subtitle": "We acknowledge within 24 hours and resolve within 15 days (IT Rules 2021).",
+    "submitted": "Grievance submitted",
+    "ticket_id": "Your ticket ID"
+  },
+  "anti_ragging": {
+    "notice": "Anti-Ragging Helpline",
+    "number": "1800-180-5522",
+    "website": "antiragging.in"
+  },
+  "errors": {
+    "required": "This field is required",
+    "invalid_email": "Invalid email address",
+    "invalid_phone": "Enter a valid 10-digit Indian mobile number",
+    "password_min": "Password must be at least 8 characters",
+    "otp_invalid": "Invalid or expired OTP. Please try again."
+  }
+}
