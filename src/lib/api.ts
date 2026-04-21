@@ -249,6 +249,7 @@ export interface Article {
   category: string
   excerpt: string | null
   body: string | null
+  body_html: string | null
   featured_image: string | null
   published_at: string | null
   reading_time: number | null
