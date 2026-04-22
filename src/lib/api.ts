@@ -320,7 +320,7 @@ export interface ConsentState {
 }
 
 export interface ConsentUpdate { purpose: string; action: 'grant' | 'withdraw' }
-export interface DataSummary { personal_info: Partial<User>; consents: ConsentState; applications_count: number; documents_count: number }
+export interface DataSummary { personal_info: Partial<User>; consents: ConsentState; applications_count: number; documents_count: number; data_retention?: { application_days: number; log_days: number } }
 export interface ParentalConsentStatus { is_minor: boolean; parental_consent_verified: boolean; parent: { parent_name: string; verified_at: string } | null }
 export interface ParentInitPayload { parent_name: string; parent_relationship: string; parent_phone: string; parent_email?: string }
 export interface GrievanceOfficer { name: string; email: string; phone: string; ack_sla_hours: number; resolve_sla_days: number }
