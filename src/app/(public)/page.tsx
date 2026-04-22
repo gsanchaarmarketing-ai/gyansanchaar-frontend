@@ -142,7 +142,7 @@ export default async function HomePage() {
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-4 mt-8 pt-6 border-t border-slate-800 text-xs text-slate-500">
-          © {new Date().getFullYear()} GyanSanchaar. All rights reserved. CIN: {{COMPANY_CIN}}
+          © {new Date().getFullYear()} GyanSanchaar. All rights reserved. CIN: {process.env.NEXT_PUBLIC_COMPANY_CIN ?? ""}
         </div>
       </footer>
 
