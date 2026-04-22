@@ -1,6 +1,11 @@
 {
   "regions": ["bom1"],
   "framework": "nextjs",
+  "build": {
+    "env": {
+      "NODE_VERSION": "20"
+    }
+  },
   "git": {
     "deploymentEnabled": {
       "main": true
