@@ -228,6 +228,8 @@ export interface College {
   approvals: string | null
   about: string | null
   logo_path: string | null
+  website: string | null
+  contact_email: string | null
   courses?: Course[]
   streams?: Stream[]
 }
@@ -240,6 +242,9 @@ export interface Course {
   duration_months: number
   stream: Stream | null
   default_fee: number
+  description: string | null
+  eligibility: string | null
+  colleges?: College[]
 }
 
 export interface Article {
