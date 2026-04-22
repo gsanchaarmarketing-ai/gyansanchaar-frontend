@@ -194,7 +194,7 @@ export default function ApplicationWizard({ user, states, courses, token }: Prop
               })}
             </select>
             {step3.formState.errors.course_id && (
-              <p className="text-rose-600 text-xs mt-0.5">{step3.formState.errors.course_id.message}</p>
+              <p className="text-rose-600 text-xs mt-0.5">{step3.formState.(errors.course_id.message as string)}</p>
             )}
           </div>
           {selectedCourse && (

@@ -54,7 +54,7 @@ export default function LoginPage() {
               <label className="block text-sm font-medium mb-1.5">Email</label>
               <input type="email" {...register('email')}
                 className="w-full border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-brand-500 outline-none" />
-              {errors.email && <p className="text-rose-600 text-xs mt-1">{errors.email.message}</p>}
+              {errors.email && <p className="text-rose-600 text-xs mt-1">{(errors.email.message as string)}</p>}
             </div>
 
             <div>
@@ -67,7 +67,7 @@ export default function LoginPage() {
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-              {errors.password && <p className="text-rose-600 text-xs mt-1">{errors.password.message}</p>}
+              {errors.password && <p className="text-rose-600 text-xs mt-1">{(errors.password.message as string)}</p>}
             </div>
 
             <button type="submit" disabled={loading}

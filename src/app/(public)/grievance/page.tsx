@@ -78,17 +78,17 @@ export default function GrievancePage() {
               <option value="">Select…</option>
               {CATEGORIES.map(([v,l]) => <option key={v} value={v}>{l}</option>)}
             </select>
-            {errors.category && <p className="text-rose-600 text-xs mt-1">{errors.category.message}</p>}
+            {errors.category && <p className="text-rose-600 text-xs mt-1">{(errors.category.message as string)}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Subject</label>
             <input type="text" {...register('subject')} className="w-full border rounded-lg px-3 py-2 text-sm" />
-            {errors.subject && <p className="text-rose-600 text-xs mt-1">{errors.subject.message}</p>}
+            {errors.subject && <p className="text-rose-600 text-xs mt-1">{(errors.subject.message as string)}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Description</label>
             <textarea rows={5} {...register('description')} className="w-full border rounded-lg px-3 py-2 text-sm resize-none" />
-            {errors.description && <p className="text-rose-600 text-xs mt-1">{errors.description.message}</p>}
+            {errors.description && <p className="text-rose-600 text-xs mt-1">{(errors.description.message as string)}</p>}
           </div>
           <button type="submit" disabled={loading} className="w-full bg-brand-600 text-white py-2.5 rounded-lg font-semibold text-sm disabled:opacity-60">
             {loading ? 'Submitting…' : 'Submit Grievance'}
