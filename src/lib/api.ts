@@ -44,7 +44,6 @@ async function request<T>(
     const res = await fetch(`${API_URL}${path}`, {
       ...init,
       headers,
-      cache: init.cache ?? 'no-store',
       signal: init.signal ?? controller.signal,
     })
 
@@ -108,6 +107,7 @@ export const publicApi = {
 
 // ── Student (requires token) ──────────────────────────────────────────────────
 
+// Student API — always no-store (auth, personal data)
 export const studentApi = {
   register: (data: RegisterPayload) =>
     request<AuthResponse>('/student/register', {
@@ -175,7 +175,7 @@ export const studentApi = {
     ),
 
   applications: (token: string) =>
-    request<ApplicationsResponse>('/student/applications', { token }),
+    request<ApplicationsResponse>('/student/applications', { token, cache: 'no-store' }),
 
   application: (token: string, id: number) =>
     request<{ data: Application }>(`/student/applications/${id}`, { token }),

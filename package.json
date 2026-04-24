@@ -54,5 +54,9 @@
   },
   "engines": {
     "node": ">=20.0.0 <22.0.0"
+  },
+  "optionalDependencies": {
+    "@next/swc-linux-x64-gnu": "14.2.29",
+    "@next/swc-linux-x64-musl": "14.2.29"
   }
 }
