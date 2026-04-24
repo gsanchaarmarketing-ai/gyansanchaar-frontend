@@ -4,11 +4,13 @@
  * Works server-side (SSR) and client-side.
  */
 
+const BACKEND = 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
+
 const API_URL =
   (typeof window === 'undefined'
-    ? process.env.API_INTERNAL_URL   // server-side: use internal URL (not exposed to browser)
-    : process.env.NEXT_PUBLIC_API_URL // client-side: use public URL
-  ) ?? 'http://localhost:8000/api/v1'
+    ? process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? BACKEND
+    : process.env.NEXT_PUBLIC_API_URL ?? BACKEND
+  )
 
 export class ApiError extends Error {
   constructor(
