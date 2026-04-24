@@ -1,70 +1,82 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowRight, CheckCircle, Star, BookOpen, Search, GraduationCap, FileText, BarChart2, Shield } from 'lucide-react'
+import {
+  ArrowRight, CheckCircle, Star, BookOpen, Search,
+  GraduationCap, FileText, BarChart2, Shield, Compass,
+  CalendarCheck, Users, Award, MapPin, ChevronRight,
+  Zap, Clock, BadgeCheck
+} from 'lucide-react'
 import { publicApi } from '@/lib/api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
-import ArticleCard from '@/components/cards/ArticleCard'
 
 export const metadata: Metadata = {
   title: 'GyanSanchaar — India\'s College Application Platform',
-  description:
-    'Apply to 500+ colleges across India in under 10 minutes. One form, verified data, zero agent fees.',
+  description: 'Apply to 500+ colleges across India in under 10 minutes. One form, verified data, zero agent fees.',
 }
 
 export const revalidate = 300
 
-const STREAMS = [
-  'Engineering', 'Medical', 'Management', 'Law', 'Design',
-  'Commerce', 'Arts', 'Science', 'Pharmacy', 'Architecture',
-  'Hotel Management', 'Agriculture', 'Education', 'Nursing',
+/* ─── Design-system constants ─────────────────────────────────────── */
+
+const TRUST_LOGOS = [
+  'IIT Delhi', 'IIM Ahmedabad', 'AIIMS', 'NIT Trichy',
+  'BITS Pilani', 'VIT Vellore', 'Manipal', 'SRM',
+]
+
+const STATS = [
+  { num: '500+',   label: 'Verified Colleges' },
+  { num: '1.2L+',  label: 'Applications Sent' },
+  { num: '98%',    label: 'Admission Success' },
+  { num: '₹0',     label: 'Agent Fees' },
 ]
 
 const FEATURES = [
-  { icon: Search, label: 'Smart College Search', desc: 'Filter by rank, fee, city, stream and more' },
-  { icon: BookOpen, label: 'Explore Courses', desc: '10,000+ UG & PG programmes with detailed info' },
-  { icon: FileText, label: 'One-Form Apply', desc: 'Apply to multiple colleges with a single form' },
-  { icon: BarChart2, label: 'NIRF Rankings', desc: 'Verified, bias-free data from official sources' },
-  { icon: GraduationCap, label: 'Track Applications', desc: 'Real-time status updates from colleges' },
-  { icon: CheckCircle, label: 'Verified Colleges', desc: 'Every college is NAAC/UGC verified before listing' },
-  { icon: Star, label: 'Exam Calendar', desc: 'JEE, NEET, CAT, CUET and 50+ entrance exams' },
-  { icon: Shield, label: 'DPDP Compliant', desc: 'Your data is safe under India\'s data protection law' },
+  { icon: Search,       title: 'Smart Search',       desc: 'Filter by rank, fee, city, stream, NAAC grade and more in seconds.' },
+  { icon: FileText,     title: 'One-Form Apply',      desc: 'A single application reaches multiple colleges simultaneously.' },
+  { icon: BarChart2,    title: 'NIRF Rankings',       desc: 'Verified, bias-free data pulled directly from official NIRF reports.' },
+  { icon: CalendarCheck,title: 'Exam Calendar',       desc: 'JEE, NEET, CAT, CUET and 50+ entrance dates in one place.' },
 ]
 
 const HOW_IT_WORKS = [
-  { step: '01', title: 'Build Your Profile', desc: 'Enter your marks, stream preference and budget. Takes 3 minutes.' },
-  { step: '02', title: 'Get Matched', desc: 'Our algorithm surfaces the best-fit colleges for your profile.' },
-  { step: '03', title: 'Apply Directly', desc: 'One form. Multiple colleges. Application goes straight to admissions.' },
+  {
+    num: '01',
+    icon: Compass,
+    title: 'Discover',
+    desc: 'Tell us your stream, marks and budget. We surface the best-fit colleges for your profile.',
+  },
+  {
+    num: '02',
+    icon: FileText,
+    title: 'Apply',
+    desc: 'One form. Multiple colleges. Your application goes straight to the admissions office.',
+  },
+  {
+    num: '03',
+    icon: CalendarCheck,
+    title: 'Book Counselling',
+    desc: 'Schedule a free session with a verified counsellor — no commissions, ever.',
+  },
+  {
+    num: '04',
+    icon: GraduationCap,
+    title: 'Get Guided',
+    desc: 'We stay with you through offer letters, document verification and enrolment.',
+  },
 ]
 
-const STUDENT_PATHS = [
-  {
-    tag: 'Class 9 / 10 / 11',
-    title: 'Figuring out what to study?',
-    cta: 'Explore Courses',
-    href: '/courses',
-    bg: 'from-violet-900 to-indigo-900',
-  },
-  {
-    tag: 'Class 12 — Ready to Apply',
-    title: 'Apply to 500+ colleges in one go.',
-    cta: 'Browse Colleges',
-    href: '/colleges',
-    bg: 'from-blue-900 to-cyan-900',
-  },
-  {
-    tag: 'Undergrad → Postgrad',
-    title: 'Looking at PG programmes?',
-    cta: 'Explore PG Courses',
-    href: '/courses?level=pg',
-    bg: 'from-slate-900 to-slate-700',
-  },
+const STREAMS = [
+  'Engineering', 'Medical', 'Management', 'Law', 'Design',
+  'Commerce', 'Arts', 'Science', 'Pharmacy', 'Architecture',
+  'Hotel Management', 'Agriculture', 'Education', 'Nursing', 'Animation',
 ]
+
+/* ─── Page ─────────────────────────────────────────────────────────── */
 
 export default async function HomePage() {
   const [articlesRes, collegesRes] = await Promise.allSettled([
     publicApi.articles({ per_page: '4' }),
-    publicApi.colleges({ per_page: '4', sort: 'nirf' }),
+    publicApi.colleges({ per_page: '6', sort: 'nirf' }),
   ])
 
   const articles = articlesRes.status === 'fulfilled' ? articlesRes.value.data : []
@@ -73,48 +85,105 @@ export default async function HomePage() {
   return (
     <>
       <Header />
-      <main className="pb-20 md:pb-0 bg-white">
+      <main className="bg-white text-heading">
 
-        {/* ── Hero ── */}
-        <section className="relative bg-slate-950 text-white overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_#1e40af33_0%,_transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,_#7c3aed22_0%,_transparent_60%)]" />
-          <div className="relative max-w-5xl mx-auto px-4 pt-20 pb-16 text-center">
-            <div className="inline-block bg-blue-600/20 border border-blue-500/30 text-blue-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase">
-              2026 Admissions Open Now
+        {/* ── HERO ─────────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-[#0F172A] via-[#1E3A8A] to-[#1D4ED8]">
+          {/* bg orbs */}
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+
+          <div className="relative max-w-container mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
+            {/* Left: Heading + CTA */}
+            <div>
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white/80 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-wider uppercase">
+                <Zap className="w-3.5 h-3.5 text-warning" />
+                2026 Admissions Open
+              </div>
+
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.08] tracking-tight mb-5">
+                India's Smartest<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300">
+                  College Application
+                </span><br />
+                Platform
+              </h1>
+
+              <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-md">
+                Apply to <strong className="text-white">500+ verified colleges</strong> in under 10 minutes.
+                One form. Direct admissions. Zero agent fees.
+              </p>
+
+              {/* CTA row */}
+              <div className="flex flex-wrap gap-3 mb-8">
+                <Link href="/register"
+                  className="inline-flex items-center gap-2 bg-white text-primary font-bold px-6 py-3.5 rounded-xl hover:bg-primary-light transition-all shadow-lg text-sm">
+                  Start Free Application <ArrowRight className="w-4 h-4" />
+                </Link>
+                <Link href="/colleges"
+                  className="inline-flex items-center gap-2 border border-white/30 text-white font-medium px-6 py-3.5 rounded-xl hover:bg-white/10 transition-all text-sm">
+                  Browse Colleges
+                </Link>
+              </div>
+
+              {/* Trust pills */}
+              <div className="flex flex-wrap gap-3 text-xs text-white/60">
+                {['No registration fees', 'DPDP Act compliant', 'UGC verified colleges'].map(t => (
+                  <span key={t} className="flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5 text-success" /> {t}
+                  </span>
+                ))}
+              </div>
             </div>
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4 tracking-tight">
-              India's Smartest Way to<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">
-                Find &amp; Apply to College
-              </span>
-            </h1>
-            <p className="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto mb-10">
-              Apply to <strong className="text-white">500+ colleges</strong> across India in under 10 minutes.
-              Verified data. Zero agent fees. Direct to admissions.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/register"
-                className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3.5 rounded-xl font-semibold text-base transition-all shadow-lg shadow-blue-900/40 w-full sm:w-auto">
-                Start Your Application →
-              </Link>
-              <Link href="/colleges"
-                className="border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white px-8 py-3.5 rounded-xl font-medium text-base transition-all w-full sm:w-auto">
-                Browse Colleges
-              </Link>
-            </div>
-            <div className="flex items-center justify-center gap-6 mt-10 text-sm text-slate-400">
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" /> No registration fees</span>
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" /> DPDP compliant</span>
-              <span className="flex items-center gap-1.5"><CheckCircle className="w-4 h-4 text-green-400" /> UGC verified colleges</span>
+
+            {/* Right: Mobile mockup card */}
+            <div className="hidden md:flex justify-center">
+              <div className="relative">
+                {/* Phone frame */}
+                <div className="w-64 bg-white rounded-[2rem] shadow-2xl shadow-black/40 border border-white/20 overflow-hidden">
+                  {/* Status bar */}
+                  <div className="bg-[#0F172A] px-5 pt-4 pb-3">
+                    <div className="text-[10px] text-white/40 mb-3">9:41 AM</div>
+                    <div className="text-white font-bold text-sm mb-1">Hi, Arjun 👋</div>
+                    <div className="text-white/60 text-xs">3 applications pending</div>
+                  </div>
+                  {/* Cards in phone */}
+                  <div className="p-3 space-y-2 bg-slate-50">
+                    {['IIT Delhi — Engineering', 'BITS Pilani — CS', 'NIT Trichy — ECE'].map((c, i) => (
+                      <div key={c} className="bg-white rounded-xl p-3 border border-border shadow-card flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${i === 0 ? 'bg-primary' : i === 1 ? 'bg-accent' : 'bg-success'}`}>
+                          <GraduationCap className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-semibold text-heading leading-tight">{c}</div>
+                          <div className="text-[10px] text-muted mt-0.5">{i === 0 ? 'Applied ✓' : i === 1 ? 'Under Review' : 'Shortlisted'}</div>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="bg-accent-gradient rounded-xl p-3 text-white text-center text-xs font-semibold mt-1">
+                      + Apply to 6 more colleges
+                    </div>
+                  </div>
+                </div>
+                {/* Floating badge */}
+                <div className="absolute -right-4 top-12 bg-white rounded-2xl shadow-lg px-3 py-2 flex items-center gap-2">
+                  <div className="w-7 h-7 bg-success/10 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-4 h-4 text-success" />
+                  </div>
+                  <div>
+                    <div className="text-[10px] font-bold text-heading">Offer Received</div>
+                    <div className="text-[9px] text-muted">BITS Pilani</div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Scrolling stream strip */}
-          <div className="relative border-t border-slate-800 overflow-hidden py-4">
-            <div className="flex animate-marquee gap-6 whitespace-nowrap">
+          {/* Stream marquee strip */}
+          <div className="relative border-t border-white/10 bg-white/5 overflow-hidden py-3">
+            <div className="flex animate-marquee gap-4 whitespace-nowrap">
               {[...STREAMS, ...STREAMS].map((s, i) => (
-                <span key={i} className="text-slate-400 text-sm font-medium px-4 py-1 border border-slate-700 rounded-full shrink-0">
+                <span key={i} className="shrink-0 text-white/50 text-xs font-medium px-4 py-1 border border-white/10 rounded-full">
                   {s}
                 </span>
               ))}
@@ -122,107 +191,230 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── Where are you right now ── */}
-        <section className="bg-slate-50 py-16 px-4">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-slate-900 mb-2">Choose Where You Are Right Now</h2>
-            <p className="text-center text-slate-500 mb-10">GyanSanchaar guides every stage of your education journey.</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-              {STUDENT_PATHS.map((p) => (
-                <Link key={p.href} href={p.href}
-                  className={`relative bg-gradient-to-br ${p.bg} rounded-2xl p-7 text-white overflow-hidden group hover:scale-[1.02] transition-transform`}>
-                  <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  <span className="inline-block bg-white/15 text-xs font-semibold px-3 py-1 rounded-full mb-4">{p.tag}</span>
-                  <h3 className="text-xl font-bold mb-6 leading-snug">{p.title}</h3>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-white/80 group-hover:text-white transition-colors">
-                    {p.cta} <ArrowRight className="w-4 h-4" />
-                  </div>
-                </Link>
+        {/* ── TRUST BAR ────────────────────────────────────────────── */}
+        <section className="border-b border-border bg-white py-10">
+          <div className="max-w-container mx-auto px-6">
+            {/* Stats row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+              {STATS.map(s => (
+                <div key={s.label} className="text-center">
+                  <div className="text-3xl font-extrabold text-primary">{s.num}</div>
+                  <div className="text-xs text-muted mt-1 font-medium">{s.label}</div>
+                </div>
+              ))}
+            </div>
+            {/* Logo strip */}
+            <div className="flex items-center gap-2 mb-4">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted font-medium px-3">Trusted by students applying to</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+            <div className="flex flex-wrap justify-center gap-3">
+              {TRUST_LOGOS.map(logo => (
+                <span key={logo}
+                  className="px-4 py-1.5 border border-border rounded-full text-xs font-medium text-body hover:border-primary hover:text-primary transition-colors cursor-default">
+                  {logo}
+                </span>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── How it works ── */}
-        <section className="py-16 px-4 bg-white">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-slate-900 mb-2">How GyanSanchaar Works</h2>
-            <p className="text-center text-slate-500 mb-12">Three steps. One platform. A lifetime decision — simplified.</p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {HOW_IT_WORKS.map((h) => (
-                <div key={h.step} className="text-center">
-                  <div className="text-5xl font-black text-blue-100 mb-3">{h.step}</div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">{h.title}</h3>
-                  <p className="text-slate-500 text-sm leading-relaxed">{h.desc}</p>
+        {/* ── FEATURES GRID (4 cards) ───────────────────────────────── */}
+        <section className="py-20 bg-primary-light">
+          <div className="max-w-container mx-auto px-6">
+            <div className="text-center mb-12">
+              <div className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Everything in one place</div>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-heading">Built for the Indian student</h2>
+              <p className="text-body mt-3 max-w-xl mx-auto">No more juggling 10 college websites, spreadsheets and agent WhatsApp groups.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+              {FEATURES.map(({ icon: Icon, title, desc }) => (
+                <div key={title}
+                  className="bg-white rounded-2xl p-6 border border-border shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all group">
+                  <div className="w-11 h-11 bg-accent-gradient rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <Icon className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="font-bold text-heading mb-2">{title}</h3>
+                  <p className="text-body text-sm leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── Mission ── */}
-        <section className="bg-slate-950 text-white py-16 px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <p className="text-2xl md:text-3xl font-bold leading-snug">
-              GyanSanchaar exists to bring <span className="text-blue-400">Order</span>,{' '}
-              <span className="text-violet-400">Access</span> and{' '}
-              <span className="text-cyan-400">Verified Clarity</span> to the most important decision of a student's life.
-            </p>
-            <div className="flex items-center justify-center gap-6 mt-10 text-sm text-slate-400">
-              <div className="flex items-center gap-1.5"><Star className="w-4 h-4 fill-yellow-400 text-yellow-400" /> Trusted by students</div>
-              <div className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-green-400" /> DPDP Act 2023 compliant</div>
+        {/* ── HOW IT WORKS (4 steps horizontal) ────────────────────── */}
+        <section className="py-20 bg-white">
+          <div className="max-w-container mx-auto px-6">
+            <div className="text-center mb-14">
+              <div className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Simple process</div>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-heading">How GyanSanchaar Works</h2>
+              <p className="text-body mt-3">Four steps. One platform. Your admission — simplified.</p>
             </div>
-          </div>
-        </section>
 
-        {/* ── Features grid ── */}
-        <section className="py-16 px-4 bg-slate-50">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-center text-slate-900 mb-2">Everything in One Place</h2>
-            <p className="text-center text-slate-500 mb-10">Built for students. Designed with transparency.</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {FEATURES.map(({ icon: Icon, label, desc }) => (
-                <div key={label} className="bg-white rounded-2xl p-5 border border-slate-100 hover:border-blue-200 hover:shadow-md transition-all group">
-                  <div className="w-10 h-10 bg-blue-50 group-hover:bg-blue-100 rounded-xl flex items-center justify-center mb-3 transition-colors">
-                    <Icon className="w-5 h-5 text-blue-600" />
+            {/* Step cards — horizontal on desktop */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-0 relative">
+              {/* connector line */}
+              <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-px bg-border z-0" />
+
+              {HOW_IT_WORKS.map((step, i) => (
+                <div key={step.num} className="relative z-10 flex flex-col items-center text-center px-4 pb-8 md:pb-0">
+                  {/* Step number bubble */}
+                  <div className="w-20 h-20 rounded-2xl bg-accent-gradient flex flex-col items-center justify-center mb-5 shadow-lg shadow-primary/20">
+                    <step.icon className="w-7 h-7 text-white mb-0.5" />
+                    <span className="text-[10px] text-white/70 font-bold">{step.num}</span>
                   </div>
-                  <div className="text-sm font-semibold text-slate-800 mb-1">{label}</div>
-                  <div className="text-xs text-slate-500 leading-relaxed">{desc}</div>
+                  <h3 className="font-bold text-heading text-base mb-2">{step.title}</h3>
+                  <p className="text-body text-sm leading-relaxed">{step.desc}</p>
+
+                  {/* Mobile connector */}
+                  {i < HOW_IT_WORKS.length - 1 && (
+                    <div className="md:hidden w-px h-8 bg-border my-2" />
+                  )}
                 </div>
               ))}
             </div>
+
+            <div className="text-center mt-12">
+              <Link href="/register"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white font-semibold px-8 py-3.5 rounded-xl transition-colors shadow-lg shadow-primary/30">
+                Get Started Free <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </div>
         </section>
 
-        {/* ── Top colleges strip ── */}
+        {/* ── FEATURED COLLEGES (scroll cards) ─────────────────────── */}
         {colleges.length > 0 && (
-          <section className="py-16 px-4 bg-white">
-            <div className="max-w-5xl mx-auto">
-              <div className="flex items-center justify-between mb-8">
+          <section className="py-20 bg-slate-50">
+            <div className="max-w-container mx-auto px-6">
+              <div className="flex items-end justify-between mb-10">
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900">Applications Closing Soon</h2>
-                  <p className="text-slate-500 text-sm mt-1">Don't miss these deadlines</p>
+                  <div className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Top picks</div>
+                  <h2 className="text-3xl md:text-4xl font-extrabold text-heading">Featured Colleges</h2>
                 </div>
-                <Link href="/colleges" className="text-blue-600 text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
-                  See all 500+ colleges <ArrowRight className="w-4 h-4" />
+                <Link href="/colleges"
+                  className="hidden md:flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all">
+                  View all 500+ <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {colleges.map((c) => (
-                  <Link key={c.id} href={`/colleges/${c.slug}`}
-                    className="border border-slate-100 rounded-2xl p-4 hover:border-blue-200 hover:shadow-md transition-all group">
-                    <div className="w-12 h-12 bg-slate-100 rounded-xl mb-3 flex items-center justify-center">
-                      <GraduationCap className="w-6 h-6 text-slate-400" />
-                    </div>
-                    <div className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors leading-snug mb-1">{c.name}</div>
-                    <div className="text-xs text-slate-400">{c.city}{c.state ? `, ${c.state.name}` : ''}</div>
-                    {c.nirf_rank && (
-                      <div className="mt-3 text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full inline-block">
-                        NIRF #{c.nirf_rank}
+
+              {/* Scroll container */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {colleges.map(c => (
+                  <div key={c.id}
+                    className="bg-white rounded-2xl border border-border shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all overflow-hidden group">
+                    {/* Image area */}
+                    <div className="h-36 bg-gradient-to-br from-primary-light to-blue-100 flex items-center justify-center relative">
+                      <div className="w-16 h-16 bg-white rounded-2xl shadow-md flex items-center justify-center">
+                        <GraduationCap className="w-8 h-8 text-primary" />
                       </div>
-                    )}
-                    <div className="mt-3 text-xs font-semibold text-blue-600 flex items-center gap-1">
-                      Apply Now <ArrowRight className="w-3 h-3" />
+                      {/* Badge/Verified */}
+                      <div className="absolute top-3 right-3 bg-white border border-success/20 text-success text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <BadgeCheck className="w-3 h-3" /> Verified
+                      </div>
+                      {/* Tag/Quota */}
+                      {c.naac_grade && (
+                        <div className="absolute top-3 left-3 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          NAAC {c.naac_grade}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-5">
+                      {/* Name */}
+                      <h3 className="font-bold text-heading text-sm leading-snug mb-1 group-hover:text-primary transition-colors">
+                        {c.name}
+                      </h3>
+                      {/* Location */}
+                      <div className="flex items-center gap-1 text-muted text-xs mb-3">
+                        <MapPin className="w-3 h-3" />
+                        {c.city}{c.state ? `, ${c.state.name}` : ''}
+                      </div>
+
+                      {/* Tags row */}
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {c.nirf_rank && (
+                          <span className="bg-primary-light text-primary text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                            NIRF #{c.nirf_rank}
+                          </span>
+                        )}
+                        {c.type && (
+                          <span className="bg-slate-100 text-body text-[10px] font-medium px-2 py-0.5 rounded-full">
+                            {c.type}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* CTA row */}
+                      <div className="flex gap-2 pt-3 border-t border-border">
+                        <Link href={`/colleges/${c.slug}`}
+                          className="flex-1 bg-primary hover:bg-primary-hover text-white text-xs font-semibold py-2 rounded-lg text-center transition-colors">
+                          Apply Now
+                        </Link>
+                        <Link href={`/colleges/${c.slug}`}
+                          className="flex-1 border border-border hover:border-primary text-body hover:text-primary text-xs font-medium py-2 rounded-lg text-center transition-all">
+                          View Details
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="text-center mt-8 md:hidden">
+                <Link href="/colleges" className="text-primary text-sm font-semibold flex items-center justify-center gap-1">
+                  View all 500+ colleges <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ── SOCIAL PROOF / MISSION ───────────────────────────────── */}
+        <section className="py-20 bg-accent-gradient text-white">
+          <div className="max-w-container mx-auto px-6 text-center">
+            <div className="text-xs font-bold text-white/60 uppercase tracking-widest mb-4">Our mission</div>
+            <p className="text-2xl md:text-4xl font-extrabold leading-tight max-w-3xl mx-auto">
+              Bringing <span className="text-blue-200">Order</span>, <span className="text-indigo-200">Access</span> &amp;{' '}
+              <span className="text-sky-200">Verified Clarity</span> to India's most important decision.
+            </p>
+            <div className="flex flex-wrap justify-center gap-6 mt-10 text-sm text-white/70">
+              <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-white/50" /> DPDP Act 2023 Compliant</span>
+              <span className="flex items-center gap-2"><Award className="w-4 h-4 text-white/50" /> UGC & NAAC Verified</span>
+              <span className="flex items-center gap-2"><Users className="w-4 h-4 text-white/50" /> No Agent Commissions</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── ARTICLES ─────────────────────────────────────────────── */}
+        {articles.length > 0 && (
+          <section className="py-20 bg-white">
+            <div className="max-w-container mx-auto px-6">
+              <div className="flex items-end justify-between mb-10">
+                <div>
+                  <div className="text-xs font-bold text-primary uppercase tracking-widest mb-2">Stay informed</div>
+                  <h2 className="text-3xl font-extrabold text-heading">News &amp; Articles</h2>
+                </div>
+                <Link href="/articles" className="hidden md:flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all">
+                  View all <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                {articles.map(a => (
+                  <Link key={a.id} href={`/articles/${a.slug}`}
+                    className="group bg-white border border-border rounded-2xl overflow-hidden shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-all">
+                    <div className="h-32 bg-gradient-to-br from-primary-light to-indigo-50 flex items-center justify-center">
+                      <BookOpen className="w-8 h-8 text-primary/40" />
+                    </div>
+                    <div className="p-4">
+                      <div className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">{a.category}</div>
+                      <h3 className="text-sm font-semibold text-heading leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                        {a.title}
+                      </h3>
+                      {a.excerpt && (
+                        <p className="text-xs text-muted mt-2 line-clamp-2">{a.excerpt}</p>
+                      )}
                     </div>
                   </Link>
                 ))}
@@ -231,110 +423,56 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ── FAQ ── */}
-        <section className="py-16 px-4 bg-slate-50">
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-900 mb-8">Does applying through GyanSanchaar actually reach the college?</h2>
-            <div className="bg-white rounded-2xl p-8 border border-slate-100 text-slate-600 leading-relaxed space-y-4">
-              <p>
-                <strong className="text-slate-900">Yes.</strong> When you apply, your application is sent directly to the college's admissions team.
-                You receive acknowledgement within <strong className="text-slate-900">48 hours</strong> — from both GyanSanchaar and the college.
-              </p>
-              <p>
-                It works exactly like applying on the college's own website, except you're doing it for multiple colleges from one place,
-                <strong className="text-slate-900"> without paying separate fees to each</strong>.
-              </p>
-              <p className="text-blue-700 font-medium">
-                No referral fees. No agent commissions. No one steering you toward a college they were paid to recommend.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── News & Articles ── */}
-        {articles.length > 0 && (
-          <section className="py-16 px-4 bg-white">
-            <div className="max-w-5xl mx-auto">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">News &amp; Articles</h2>
-                <Link href="/articles" className="text-blue-600 text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all">
-                  View all <ArrowRight className="w-4 h-4" />
-                </Link>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {articles.map(a => <ArticleCard key={a.id} article={a} />)}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── Stats ── */}
-        <section className="bg-blue-600 text-white py-16 px-4">
-          <div className="max-w-4xl mx-auto grid grid-cols-3 gap-8 text-center">
-            {[
-              { num: '500+', label: 'Verified Colleges' },
-              { num: '10,000+', label: 'Courses Listed' },
-              { num: '0', label: 'Agent Commissions' },
-            ].map(({ num, label }) => (
-              <div key={label}>
-                <div className="text-4xl font-black mb-1">{num}</div>
-                <div className="text-blue-200 text-sm">{label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* ── Anti-ragging ── */}
-        <section className="bg-amber-50 border-y border-amber-200">
-          <div className="max-w-7xl mx-auto px-4 py-3 text-center text-sm">
-            <span className="font-semibold text-amber-800">Anti-Ragging Helpline: </span>
-            <a href="tel:18001805522" className="text-amber-700 font-bold">1800-180-5522</a>
-            <span className="text-amber-700"> (Free, 24×7) · </span>
-            <a href="https://antiragging.in" target="_blank" rel="noopener noreferrer" className="text-amber-700 underline">antiragging.in</a>
-          </div>
-        </section>
+        {/* ── ANTI-RAGGING ─────────────────────────────────────────── */}
+        <div className="bg-warning/10 border-y border-warning/20 py-3 px-4 text-center text-sm">
+          <span className="font-semibold text-warning">Anti-Ragging Helpline: </span>
+          <a href="tel:18001805522" className="font-bold text-[#92400E]">1800-180-5522</a>
+          <span className="text-[#92400E]"> (Free · 24×7) · </span>
+          <a href="https://antiragging.in" target="_blank" rel="noopener noreferrer" className="underline text-[#92400E]">antiragging.in</a>
+        </div>
 
       </main>
 
-      {/* ── Footer ── */}
-      <footer className="bg-slate-950 text-slate-400 text-sm py-14 md:pb-14 pb-20">
-        <div className="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8">
-          <div className="col-span-2 md:col-span-2">
-            <div className="flex items-center gap-2 text-white font-bold text-xl mb-3">
-              <GraduationCap className="w-6 h-6 text-blue-500" /> GyanSanchaar
+      {/* ── FOOTER ───────────────────────────────────────────────────── */}
+      <footer className="bg-heading text-muted text-sm pt-14 pb-20 md:pb-14">
+        <div className="max-w-container mx-auto px-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8 pb-10 border-b border-white/10">
+            {/* Brand col */}
+            <div className="col-span-2">
+              <div className="flex items-center gap-2 text-white font-bold text-lg mb-3">
+                <div className="w-7 h-7 rounded-lg bg-accent-gradient flex items-center justify-center">
+                  <GraduationCap className="w-4 h-4 text-white" />
+                </div>
+                GyanSanchaar
+              </div>
+              <p className="text-xs text-white/40 leading-relaxed max-w-xs mb-4">
+                India's College Application Platform. Verified data. Direct admissions. DPDP Act 2023 compliant.
+              </p>
+              <div className="text-xs text-white/30">Made with ❤️ in India 🇮🇳</div>
             </div>
-            <div className="text-xs leading-relaxed text-slate-500 max-w-xs">
-              The College Applications Platform for India. Verified data. Direct admissions. DPDP Act 2023 compliant.
-            </div>
+
+            {[
+              { heading: 'Students',  links: [['Colleges', '/colleges'], ['Courses', '/courses'], ['Exams', '/exams'], ['Apply', '/register']] },
+              { heading: 'Company',   links: [['About', '/about'], ['Articles', '/articles'], ['Contact', '/contact'], ['Grievance', '/grievance']] },
+              { heading: 'Legal',     links: [['Privacy Policy', '/privacy'], ['Terms', '/terms'], ['Grievance Policy', '/grievance-policy'], ['Refund', '/refund']] },
+            ].map(col => (
+              <div key={col.heading}>
+                <div className="text-white font-semibold text-xs uppercase tracking-wider mb-4">{col.heading}</div>
+                <ul className="space-y-2.5">
+                  {col.links.map(([l, h]) => (
+                    <li key={h}>
+                      <Link href={h} className="hover:text-white transition-colors text-xs">{l}</Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-          <div>
-            <div className="text-white font-semibold mb-3">Quick Links</div>
-            <ul className="space-y-2">
-              {[['Students', '/register'], ['Colleges', '/colleges'], ['Courses', '/courses'], ['Exams', '/exams']].map(([l, h]) => (
-                <li key={h}><Link href={h} className="hover:text-white transition-colors">{l}</Link></li>
-              ))}
-            </ul>
+
+          <div className="flex flex-col md:flex-row justify-between gap-2 pt-6 text-xs text-white/30">
+            <span>© {new Date().getFullYear()} GyanSanchaar. All rights reserved.{process.env.NEXT_PUBLIC_COMPANY_CIN ? ` CIN: ${process.env.NEXT_PUBLIC_COMPANY_CIN}` : ''}</span>
+            <span>Regulated under UGC Act · DPDP Act 2023</span>
           </div>
-          <div>
-            <div className="text-white font-semibold mb-3">Company</div>
-            <ul className="space-y-2">
-              {[['About', '/about'], ['Articles', '/articles'], ['Contact', '/contact'], ['Grievance', '/grievance']].map(([l, h]) => (
-                <li key={h}><Link href={h} className="hover:text-white transition-colors">{l}</Link></li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <div className="text-white font-semibold mb-3">Legal</div>
-            <ul className="space-y-2">
-              {[['Privacy Policy', '/privacy'], ['Terms', '/terms'], ['Grievance Policy', '/grievance-policy'], ['Refund Policy', '/refund']].map(([l, h]) => (
-                <li key={h}><Link href={h} className="hover:text-white transition-colors">{l}</Link></li>
-              ))}
-            </ul>
-          </div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 mt-10 pt-6 border-t border-slate-800 text-xs text-slate-600 flex flex-col md:flex-row justify-between gap-2">
-          <span>© {new Date().getFullYear()} GyanSanchaar. All rights reserved. {process.env.NEXT_PUBLIC_COMPANY_CIN ? `CIN: ${process.env.NEXT_PUBLIC_COMPANY_CIN}` : ''}</span>
-          <span>Made in India 🇮🇳</span>
         </div>
       </footer>
 
