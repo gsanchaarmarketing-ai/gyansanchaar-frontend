@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { publicApi, type Course } from '@/lib/api'
+import { publicApi, type Course, ApiError } from '@/lib/api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import CollegeCard from '@/components/cards/CollegeCard'
@@ -31,7 +31,10 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
   try {
     const r = await publicApi.course(params.slug)
     course = r.data
-  } catch {}
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) notFound()
+    throw err
+  }
 
   if (!course) notFound()
 

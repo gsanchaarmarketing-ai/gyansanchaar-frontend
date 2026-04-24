@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { publicApi, type Exam } from '@/lib/api'
+import { publicApi, type Exam, ApiError } from '@/lib/api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
@@ -36,7 +36,10 @@ export default async function ExamDetailPage({ params }: Props) {
   try {
     const r = await publicApi.exam(params.slug)
     exam = r.data
-  } catch {}
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) notFound()
+    throw err
+  }
 
   if (!exam) notFound()
 

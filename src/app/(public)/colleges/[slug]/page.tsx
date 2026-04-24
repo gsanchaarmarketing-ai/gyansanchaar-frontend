@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { publicApi } from '@/lib/api'
+import { publicApi, ApiError } from '@/lib/api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import CollegeDetailClient from '@/components/college/CollegeDetailClient'
@@ -30,8 +30,10 @@ export default async function CollegeDetailPage({ params }: { params: { slug: st
   try {
     const res = await publicApi.college(params.slug)
     college = res.data
-  } catch {
-    // If it's a 404, show not found. If it's a timeout/network error, show error page
+  } catch (err) {
+    // Only show 404 for actual 404 responses — let timeouts bubble to error.tsx
+    if (err instanceof ApiError && err.status === 404) notFound()
+    throw err
   }
 
   if (!college) notFound()
