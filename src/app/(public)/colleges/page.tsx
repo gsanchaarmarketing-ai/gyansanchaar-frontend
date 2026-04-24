@@ -48,6 +48,7 @@ export default async function CollegesPage({
   const colleges = collegesRes.status === 'fulfilled' ? collegesRes.value : null
   const states   = statesRes.status   === 'fulfilled' ? statesRes.value.data : []
   const streams  = streamsRes.status  === 'fulfilled' ? streamsRes.value.data : []
+  const apiDown  = collegesRes.status === 'rejected'
 
   return (
     <>
@@ -92,8 +93,8 @@ export default async function CollegesPage({
             ) : (
               <div className="py-16 text-center text-slate-500">
                 <div className="text-4xl mb-3">🏫</div>
-                <div className="font-medium">No colleges found</div>
-                <div className="text-sm mt-1">Try adjusting your filters</div>
+                <div className="font-medium">{apiDown ? 'Loading colleges...' : 'No colleges found'}</div>
+                <div className="text-sm mt-1">{apiDown ? 'Server is waking up — refresh in 15 seconds' : 'Try adjusting your filters'}</div>
               </div>
             )}
           </section>

@@ -36,20 +36,32 @@ async function request<T>(
     ...(init.headers as Record<string, string> | undefined),
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers,
-    cache: init.cache ?? 'no-store',
-  })
+  // 8-second timeout — handles backend cold-start/hibernation on free tier
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 8000)
 
-  if (!res.ok) {
-    let data: Record<string, unknown> = {}
-    try { data = await res.json() } catch {}
-    throw new ApiError(res.status, data)
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      ...init,
+      headers,
+      cache: init.cache ?? 'no-store',
+      signal: init.signal ?? controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    if (!res.ok) {
+      let data: Record<string, unknown> = {}
+      try { data = await res.json() } catch {}
+      throw new ApiError(res.status, data)
+    }
+
+    if (res.status === 204) return {} as T
+    return res.json() as Promise<T>
+  } catch (err) {
+    clearTimeout(timeoutId)
+    throw err
   }
-
-  if (res.status === 204) return {} as T
-  return res.json() as Promise<T>
 }
 
 // ── Public (no auth) ─────────────────────────────────────────────────────────
