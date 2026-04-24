@@ -301,12 +301,22 @@ export interface Counsellor {
   name: string
   slug: string
   specialisation: string | null
+  expertise: string[]
   bio: string | null
   experience_years: number | null
   languages: string[]
-  photo_path: string | null
-  rating: number | null
-  review_count: number
+  photo_url: string | null
+  qualification: string | null
+  current_organisation: string | null
+  sessions_completed: number
+  rating_avg: number | null
+  rating_count: number
+  is_available: boolean
+  is_verified: boolean
+  // Alias fields used in UI
+  rating?: number
+  review_count?: number
+  photo_path?: string | null
 }
 
 export interface Application {

@@ -5,11 +5,31 @@ import MobileNav from '@/components/layout/MobileNav'
 import CollegeCard from '@/components/cards/CollegeCard'
 import CollegeFilters from '@/components/forms/CollegeFilters'
 
-export const metadata: Metadata = {
-  title: 'Colleges in India 2026 — Filter by State, Type, NIRF Rank | GyanSanchaar',
-  description: 'Browse and compare 500+ verified colleges across India. Filter by state, type, NIRF rank, and stream. Apply directly — zero agent fees.',
-  alternates: { canonical: '/colleges' },
-  openGraph: { title: 'Colleges in India 2026 | GyanSanchaar', description: 'Browse 500+ verified colleges. Apply free.' },
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Record<string, string>
+}): Promise<Metadata> {
+  const page = Number(searchParams.page ?? 1)
+  // Filtered views: canonical = /colleges (no params) — consolidates thin pages
+  // Paginated views (no filters): canonical = /colleges?page=N
+  const hasFilters = Object.keys(searchParams).some(k => k !== 'page')
+  const canonicalUrl = hasFilters
+    ? '/colleges'
+    : page > 1 ? `/colleges?page=${page}` : '/colleges'
+
+  return {
+    title: `Colleges in India ${new Date().getFullYear()} — Filter by State, Type, NIRF Rank | GyanSanchaar`,
+    description: 'Browse and compare 500+ verified colleges across India. Filter by state, type, NIRF rank, and stream. Apply directly — zero agent fees.',
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: 'Colleges in India | GyanSanchaar',
+      description: 'Browse 500+ verified colleges. Apply free.',
+      url: `${BASE}/colleges`,
+    },
+  }
 }
 
 export const revalidate = 300
