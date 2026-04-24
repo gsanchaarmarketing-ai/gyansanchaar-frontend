@@ -71,7 +71,16 @@ export const publicApi = {
 
   streams: () => request<{ data: Stream[] }>('/public/streams', { next: { revalidate: 86400 } }),
 
-  exams: () => request<ExamsResponse>('/public/exams'),
+  exams: (params?: Record<string, string>) => request<ExamsResponse>('/public/exams', { next: { revalidate: 3600 } }),
+
+  exam: (slug: string) =>
+    request<{ data: Exam }>(`/public/exams/${slug}`, { next: { revalidate: 3600 } }),
+
+  counsellors: (params?: Record<string, string>) =>
+    request<CounsellorsResponse>(`/public/counsellors?${new URLSearchParams(params)}`),
+
+  counsellor: (slug: string) =>
+    request<{ data: Counsellor }>(`/public/counsellors/${slug}`),
 
   grievanceOfficer: () => request<GrievanceOfficer>('/public/grievance-officer'),
 
@@ -165,6 +174,9 @@ export const studentApi = {
       method: 'POST',
       token,
     }),
+
+  downloadLetter: (token: string, id: number) =>
+    request<{ url?: string; message?: string }>(`/student/applications/${id}/letter`, { token }),
 
   documents: (token: string) =>
     request<{ data: Document[] }>('/student/documents', { token }),
@@ -266,6 +278,37 @@ export interface Article {
 export interface State { id: number; name: string; slug: string; iso_code: string }
 export interface Stream { id: number; name: string; short: string; slug: string; icon: string | null }
 
+export interface Exam {
+  id: number
+  name: string
+  slug: string
+  short_name: string | null
+  level: string
+  conducting_body: string | null
+  description: string | null
+  eligibility: string | null
+  exam_pattern: string | null
+  registration_start: string | null
+  registration_end: string | null
+  exam_date: string | null
+  result_date: string | null
+  official_website: string | null
+  streams: Stream[]
+}
+
+export interface Counsellor {
+  id: number
+  name: string
+  slug: string
+  specialisation: string | null
+  bio: string | null
+  experience_years: number | null
+  languages: string[]
+  photo_path: string | null
+  rating: number | null
+  review_count: number
+}
+
 export interface Application {
   id: number
   college: College
@@ -274,6 +317,7 @@ export interface Application {
   status: string
   interview_at: string | null
   admission_letter_path: string | null
+  admission_letter_url: string | null
   created_at: string
 }
 
@@ -294,7 +338,8 @@ export interface Paginated<T> {
 export type CollegesResponse = Paginated<College>
 export type CoursesResponse = Paginated<Course>
 export type ArticlesResponse = Paginated<Article>
-export type ExamsResponse = Paginated<{ id: number; name: string; slug: string; level: string; exam_date: string | null }>
+export type ExamsResponse = Paginated<Exam>
+export type CounsellorsResponse = Paginated<Counsellor>
 export type ApplicationsResponse = Paginated<Application>
 
 export interface AuthResponse {

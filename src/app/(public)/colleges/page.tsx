@@ -6,8 +6,10 @@ import CollegeCard from '@/components/cards/CollegeCard'
 import CollegeFilters from '@/components/forms/CollegeFilters'
 
 export const metadata: Metadata = {
-  title: 'Colleges in India — Filter by State, Type, Stream',
-  description: 'Browse and compare thousands of colleges across India. Filter by state, type, NIRF rank, and stream.',
+  title: 'Colleges in India 2026 — Filter by State, Type, NIRF Rank | GyanSanchaar',
+  description: 'Browse and compare 500+ verified colleges across India. Filter by state, type, NIRF rank, and stream. Apply directly — zero agent fees.',
+  alternates: { canonical: '/colleges' },
+  openGraph: { title: 'Colleges in India 2026 | GyanSanchaar', description: 'Browse 500+ verified colleges. Apply free.' },
 }
 
 export const revalidate = 300

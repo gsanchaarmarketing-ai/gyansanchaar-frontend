@@ -6,8 +6,9 @@ import Link from 'next/link'
 import { BookOpen, Clock, ArrowRight, Search, ChevronRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Education News, Guides & Admission Alerts | GyanSanchaar',
+  title: 'Education News, Guides & Admission Alerts 2026 | GyanSanchaar',
   description: 'Latest admission news, exam updates, college guides, and career articles for Indian students.',
+  alternates: { canonical: '/articles' },
 }
 export const revalidate = 300
 

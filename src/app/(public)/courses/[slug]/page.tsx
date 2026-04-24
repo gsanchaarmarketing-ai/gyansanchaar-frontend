@@ -13,7 +13,15 @@ export const revalidate = 300
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
     const { data: c } = await publicApi.course(params.slug)
-    return { title: `${c.name} — Colleges, Fees, Eligibility | GyanSanchaar` }
+    const title = `${c.name} — Colleges, Fees, Eligibility ${new Date().getFullYear()} | GyanSanchaar`
+    const description = `${c.name} (${c.level?.toUpperCase()}) — ${c.duration_months} months. Starting fee ${c.default_fee ? '₹' + Math.round(c.default_fee / 1000) + 'K/yr' : 'varies'}. View ${c.colleges?.length ?? 'top'} colleges, eligibility and apply free.`
+    return {
+      title,
+      description,
+      alternates: { canonical: `/courses/${c.slug}` },
+      openGraph: { title, description, type: 'website' },
+      twitter: { card: 'summary', title, description },
+    }
   } catch { return { title: 'Course' } }
 }
 
@@ -23,9 +31,26 @@ export default async function CourseDetailPage({ params }: { params: { slug: str
   catch { notFound() }
 
   const jsonLd = {
-    '@context': 'https://schema.org', '@type': 'Course',
+    '@context': 'https://schema.org',
+    '@type': 'Course',
     name: course.name,
-    provider: { '@type': 'Organization', name: 'GyanSanchaar', sameAs: 'https://gyansanchaar.cloud' },
+    description: course.description ?? `${course.name} degree programme offered by colleges across India.`,
+    provider: {
+      '@type': 'Organization',
+      name: 'GyanSanchaar',
+      sameAs: process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com',
+    },
+    educationalLevel: course.level?.toUpperCase(),
+    timeRequired: `P${Math.round((course.duration_months ?? 24) / 12)}Y`,
+    ...(course.eligibility ? { coursePrerequisites: course.eligibility } : {}),
+    ...(course.default_fee ? {
+      offers: {
+        '@type': 'Offer',
+        price: course.default_fee,
+        priceCurrency: 'INR',
+        availability: 'https://schema.org/InStock',
+      },
+    } : {}),
   }
 
   return (

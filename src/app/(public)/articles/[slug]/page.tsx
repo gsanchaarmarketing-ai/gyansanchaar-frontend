@@ -12,9 +12,25 @@ export const revalidate = 300
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
     const { data: a } = await publicApi.article(params.slug)
+    const title = `${a.meta_title ?? a.title} | GyanSanchaar`
+    const description = a.meta_description ?? a.excerpt ?? ''
     return {
-      title: `${a.meta_title ?? a.title} | GyanSanchaar`,
-      description: a.meta_description ?? a.excerpt ?? '',
+      title,
+      description,
+      alternates: { canonical: `/articles/${a.slug}` },
+      openGraph: {
+        title,
+        description,
+        type: 'article',
+        ...(a.published_at ? { publishedTime: a.published_at } : {}),
+        ...(a.featured_image ? { images: [{ url: a.featured_image }] } : {}),
+      },
+      twitter: {
+        card: a.featured_image ? 'summary_large_image' : 'summary',
+        title,
+        description,
+        ...(a.featured_image ? { images: [a.featured_image] } : {}),
+      },
     }
   } catch { return { title: 'Article Not Found' } }
 }

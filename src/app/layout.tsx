@@ -4,23 +4,32 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { Toaster } from 'sonner'
 import QueryProvider from '@/components/layout/QueryProvider'
+import CookieConsent from '@/components/layout/CookieConsent'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap' })
 
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
+
 export const metadata: Metadata = {
   title: {
-    default: 'GyanSanchaar — Find Your College',
+    default: 'GyanSanchaar — India\'s College Application Platform',
     template: '%s | GyanSanchaar',
   },
   description:
-    'Discover colleges, courses, and exams across India. Apply to multiple colleges with one application form.',
-  keywords: ['colleges in India', 'admission 2025', 'courses', 'engineering colleges', 'MBA colleges'],
+    'Apply to 500+ verified colleges across India in under 10 minutes. One form, direct admissions, zero agent fees. DPDP Act 2023 compliant.',
+  keywords: ['colleges in India', 'admission 2026', 'college application', 'engineering colleges', 'MBA colleges', 'NIRF ranking', 'NEET colleges', 'JEE colleges'],
+  metadataBase: new URL(BASE),
   openGraph: {
     type: 'website',
     locale: 'en_IN',
-    url: 'https://gyansanchaar.cloud',
+    url: BASE,
     siteName: 'GyanSanchaar',
+    images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'GyanSanchaar' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@gyansanchaar',
   },
   robots: { index: true, follow: true },
 }
@@ -44,6 +53,7 @@ export default async function RootLayout({
           <QueryProvider>
             {children}
             <Toaster richColors position="top-right" />
+            <CookieConsent />
           </QueryProvider>
         </NextIntlClientProvider>
       </body>

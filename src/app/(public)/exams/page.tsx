@@ -5,8 +5,9 @@ import MobileNav from '@/components/layout/MobileNav'
 import { Calendar, ExternalLink } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Entrance Exam Calendar 2025–26 | GyanSanchaar',
-  description: 'JEE, NEET, CAT, CLAT, GATE and more — exam dates, registration deadlines, results.',
+  title: 'Entrance Exam Calendar 2026 — JEE, NEET, CAT, CLAT, GATE | GyanSanchaar',
+  description: 'JEE, NEET, CAT, CLAT, GATE and 50+ entrance exams — dates, registration deadlines, eligibility and results in one place.',
+  alternates: { canonical: '/exams' },
 }
 export const revalidate = 3600
 

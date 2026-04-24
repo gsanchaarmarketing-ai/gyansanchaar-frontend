@@ -7,8 +7,9 @@ import { BookOpen, Clock, ChevronRight } from 'lucide-react'
 import { formatFee } from '@/lib/utils'
 
 export const metadata: Metadata = {
-  title: 'Courses in India — UG, PG, Diploma | GyanSanchaar',
-  description: 'Explore UG, PG, diploma and certificate courses across all streams in India. View fees, duration, eligibility.',
+  title: 'Courses in India 2026 — UG, PG, Diploma | GyanSanchaar',
+  description: 'Explore UG, PG, diploma and certificate courses across all streams in India. View fees, duration, eligibility and apply to colleges.',
+  alternates: { canonical: '/courses' },
 }
 export const revalidate = 300
 

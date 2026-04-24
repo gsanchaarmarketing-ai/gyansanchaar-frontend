@@ -10,9 +10,23 @@ export const revalidate = 300
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
     const { data: c } = await publicApi.college(params.slug)
+    const title = `${c.name} — Admissions ${new Date().getFullYear()}, Courses, Fees | GyanSanchaar`
+    const description = `${c.name} in ${c.city}${c.state ? ', ' + c.state.name : ''}. NIRF Rank: ${c.nirf_rank ?? 'N/A'}. NAAC: ${c.naac_grade ?? 'N/A'}. View courses, fees, eligibility and apply directly — zero agent fees.`
     return {
-      title: `${c.name} — Admissions, Courses, Fees | GyanSanchaar`,
-      description: `${c.name} in ${c.city}. NIRF Rank: ${c.nirf_rank ?? 'N/A'}. View courses, fees, placements and admission process.`,
+      title,
+      description,
+      alternates: { canonical: `/colleges/${c.slug}` },
+      openGraph: {
+        title,
+        description,
+        type: 'website',
+        ...(c.logo_path ? { images: [{ url: c.logo_path }] } : {}),
+      },
+      twitter: {
+        card: 'summary',
+        title,
+        description,
+      },
     }
   } catch { return { title: 'College Not Found' } }
 }
@@ -28,8 +42,18 @@ export default async function CollegeDetailPage({ params }: { params: { slug: st
     '@context': 'https://schema.org',
     '@type': 'EducationalOrganization',
     name: college.name,
-    address: { '@type': 'PostalAddress', addressLocality: college.city, addressCountry: 'IN' },
-    ...(college.nirf_rank && { award: `NIRF Rank ${college.nirf_rank}` }),
+    url: college.website ?? `https://gyansanchaar.com/colleges/${college.slug}`,
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: college.city,
+      addressRegion: college.state?.name ?? '',
+      addressCountry: 'IN',
+    },
+    ...(college.contact_email ? { email: college.contact_email } : {}),
+    ...(college.nirf_rank ? { award: `NIRF Rank ${college.nirf_rank}` } : {}),
+    ...(college.naac_grade ? { description: `NAAC Grade ${college.naac_grade}` } : {}),
+    ...(college.logo_path ? { logo: college.logo_path } : {}),
+    sameAs: college.website ? [college.website] : [],
   }
 
   return (
