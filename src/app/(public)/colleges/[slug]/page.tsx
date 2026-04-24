@@ -11,32 +11,30 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   try {
     const { data: c } = await publicApi.college(params.slug)
     const title = `${c.name} — Admissions ${new Date().getFullYear()}, Courses, Fees | GyanSanchaar`
-    const description = `${c.name} in ${c.city}${c.state ? ', ' + c.state.name : ''}. NIRF Rank: ${c.nirf_rank ?? 'N/A'}. NAAC: ${c.naac_grade ?? 'N/A'}. View courses, fees, eligibility and apply directly — zero agent fees.`
+    const description = `${c.name} in ${c.city}${c.state ? ', ' + c.state.name : ''}. NIRF Rank: ${c.nirf_rank ?? 'N/A'}. NAAC: ${c.naac_grade ?? 'N/A'}. Apply directly — zero agent fees.`
     return {
       title,
       description,
       alternates: { canonical: `/colleges/${c.slug}` },
-      openGraph: {
-        title,
-        description,
-        type: 'website',
-        ...(c.logo_path ? { images: [{ url: c.logo_path }] } : {}),
-      },
-      twitter: {
-        card: 'summary',
-        title,
-        description,
-      },
+      openGraph: { title, description, type: 'website', ...(c.logo_path ? { images: [{ url: c.logo_path }] } : {}) },
+      twitter: { card: 'summary', title, description },
     }
-  } catch { return { title: 'College Not Found' } }
+  } catch {
+    return { title: 'College Details | GyanSanchaar' }
+  }
 }
 
 export default async function CollegeDetailPage({ params }: { params: { slug: string } }) {
-  let college: any
+  let college: any = null
+
   try {
     const res = await publicApi.college(params.slug)
     college = res.data
-  } catch { notFound() }
+  } catch {
+    // If it's a 404, show not found. If it's a timeout/network error, show error page
+  }
+
+  if (!college) notFound()
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -53,7 +51,6 @@ export default async function CollegeDetailPage({ params }: { params: { slug: st
     ...(college.nirf_rank ? { award: `NIRF Rank ${college.nirf_rank}` } : {}),
     ...(college.naac_grade ? { description: `NAAC Grade ${college.naac_grade}` } : {}),
     ...(college.logo_path ? { logo: college.logo_path } : {}),
-    sameAs: college.website ? [college.website] : [],
   }
 
   return (
