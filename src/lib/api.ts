@@ -4,7 +4,11 @@
  * Works server-side (SSR) and client-side.
  */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000/api/v1'
+const API_URL =
+  (typeof window === 'undefined'
+    ? process.env.API_INTERNAL_URL   // server-side: use internal URL (not exposed to browser)
+    : process.env.NEXT_PUBLIC_API_URL // client-side: use public URL
+  ) ?? 'http://localhost:8000/api/v1'
 
 export class ApiError extends Error {
   constructor(
