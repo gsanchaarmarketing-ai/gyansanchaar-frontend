@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'JEE, NEET, CAT, CLAT, GATE and 50+ entrance exams — dates, registration deadlines, eligibility and results in one place.',
   alternates: { canonical: '/exams' },
 }
-export const revalidate = 3600
+export const dynamic = 'force-dynamic'
 
 export default async function ExamsPage() {
   const res = await publicApi.exams().catch(() => null)

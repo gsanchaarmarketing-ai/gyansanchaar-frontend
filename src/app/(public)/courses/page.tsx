@@ -25,7 +25,7 @@ export async function generateMetadata({
     openGraph: { title: 'Courses in India | GyanSanchaar', url: `${BASE}/courses` },
   }
 }
-export const revalidate = 300
+export const dynamic = 'force-dynamic'
 
 export default async function CoursesPage({ searchParams }: { searchParams: Record<string, string> }) {
   const [coursesRes, streamsRes] = await Promise.allSettled([
