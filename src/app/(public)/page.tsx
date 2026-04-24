@@ -128,7 +128,7 @@ export default async function HomePage() {
 
               {/* Trust pills */}
               <div className="flex flex-wrap gap-3 text-xs text-white/60">
-                {['No registration fees', 'DPDP Act compliant', 'UGC verified colleges'].map(t => (
+                {['No registration fees', 'DPDP Act compliant', 'UGC-recognised colleges only'].map(t => (
                   <span key={t} className="flex items-center gap-1.5">
                     <CheckCircle className="w-3.5 h-3.5 text-success" /> {t}
                   </span>

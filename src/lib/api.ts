@@ -238,6 +238,7 @@ export interface College {
   nirf_rank: number | null
   naac_grade: string | null
   approvals: string | null
+  ugc_verified: boolean
   about: string | null
   logo_path: string | null
   website: string | null

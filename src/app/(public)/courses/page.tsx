@@ -6,10 +6,24 @@ import MobileNav from '@/components/layout/MobileNav'
 import { BookOpen, Clock, ChevronRight } from 'lucide-react'
 import { formatFee } from '@/lib/utils'
 
-export const metadata: Metadata = {
-  title: 'Courses in India 2026 — UG, PG, Diploma | GyanSanchaar',
-  description: 'Explore UG, PG, diploma and certificate courses across all streams in India. View fees, duration, eligibility and apply to colleges.',
-  alternates: { canonical: '/courses' },
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Record<string, string>
+}): Promise<Metadata> {
+  const hasFilters = Object.keys(searchParams).some(k => k !== 'page')
+  const page = Number(searchParams.page ?? 1)
+  const canonicalUrl = hasFilters
+    ? '/courses'
+    : page > 1 ? `/courses?page=${page}` : '/courses'
+  return {
+    title: `Courses in India ${new Date().getFullYear()} — UG, PG, Diploma | GyanSanchaar`,
+    description: 'Explore UG, PG, diploma and certificate courses across all streams in India. View fees, duration, eligibility and apply to colleges.',
+    alternates: { canonical: canonicalUrl },
+    openGraph: { title: 'Courses in India | GyanSanchaar', url: `${BASE}/courses` },
+  }
 }
 export const revalidate = 300
 
@@ -22,8 +36,22 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
   const streams = streamsRes.status === 'fulfilled' ? streamsRes.value.data : []
   const LEVELS = ['ug','pg','diploma','phd','certificate']
 
+  const jsonLd = courses?.data.length ? {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Courses in India',
+    numberOfItems: courses.meta.total,
+    itemListElement: courses.data.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      url: `https://gyansanchaar.com/courses/${c.slug}`,
+    })),
+  } : null
+
   return (
     <>
+      {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />}
       <Header />
       <main className="max-w-6xl mx-auto px-4 py-6 pb-24 md:pb-8">
         <h1 className="text-2xl font-bold mb-1">Courses in India</h1>
@@ -32,12 +60,13 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-6">
           <form method="GET" className="flex flex-wrap gap-2">
-            <select name="level" defaultValue={searchParams.level ?? ''} onChange={e => { const p = new URLSearchParams(searchParams); p.set('level', e.target.value); window.location.search = p.toString() }}
+            <select name="level" defaultValue={searchParams.level ?? ''}
               className="border rounded-lg px-3 py-2 text-sm">
               <option value="">All Levels</option>
               {LEVELS.map(l => <option key={l} value={l}>{l.toUpperCase()}</option>)}
             </select>
-            <select name="stream_id" defaultValue={searchParams.stream_id ?? ''} className="border rounded-lg px-3 py-2 text-sm">
+            <select name="stream_id" defaultValue={searchParams.stream_id ?? ''}
+              className="border rounded-lg px-3 py-2 text-sm">
               <option value="">All Streams</option>
               {streams.map(s => <option key={s.id} value={s.id}>{s.short}</option>)}
             </select>
