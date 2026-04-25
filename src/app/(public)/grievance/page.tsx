@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { studentApi } from '@/lib/api'
-import Header from '@/components/layout/Header'
+import Header from '@/components/layout/HeaderClient'
 import MobileNav from '@/components/layout/MobileNav'
 import { CheckCircle } from 'lucide-react'
 

@@ -187,6 +187,8 @@ function CourseApplyButton({ college, course }: { college: any; course: any }) {
     </button>
   )
 }
+
+export default function CollegeDetailClient({ college }: { college: any }) {
   const [activeTab, setActiveTab] = useState<Tab>('Overview')
   const courses = college.courses ?? []
 

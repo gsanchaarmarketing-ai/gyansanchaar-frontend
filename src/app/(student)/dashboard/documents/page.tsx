@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { studentApi } from '@/lib/api'
 import { toast } from 'sonner'
-import Header from '@/components/layout/Header'
+import Header from '@/components/layout/HeaderClient'
 import MobileNav from '@/components/layout/MobileNav'
 import { FileText, Upload, Trash2, Download } from 'lucide-react'
 
@@ -61,7 +61,7 @@ export default function DocumentsPage() {
 
   return (
     <>
-      <Header isLoggedIn />
+      <Header />
       <main className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-10">
         <h1 className="text-xl font-bold mb-1">Documents</h1>
         <p className="text-slate-500 text-sm mb-6">Upload your marksheets and ID proofs. Stored securely per DPDP Act 2023.</p>

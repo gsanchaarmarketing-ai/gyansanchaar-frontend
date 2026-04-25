@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import Header from '@/components/layout/Header'
+import Header from '@/components/layout/HeaderClient'
 import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
 import { Calendar, Clock, MessageCircle, X, RotateCw, CheckCircle2, ArrowLeft } from 'lucide-react'
