@@ -99,11 +99,6 @@ export default async function HomePage() {
           <div className="relative max-w-container mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
             {/* Left: Heading + CTA */}
             <div className="select-none">
-              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white/80 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-wider uppercase">
-                <Zap className="w-3.5 h-3.5 text-warning" />
-                2026 Admissions Open
-              </div>
-
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.08] tracking-tight mb-5">
                 India's Smartest<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300">
