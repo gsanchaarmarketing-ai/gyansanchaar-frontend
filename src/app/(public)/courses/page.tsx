@@ -40,7 +40,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Courses in India',
-    numberOfItems: courses.meta.total,
+    numberOfItems: courses?.meta?.total ?? 0,
     itemListElement: courses.data.map((c, i) => ({
       '@type': 'ListItem',
       position: i + 1,
@@ -55,7 +55,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
       <Header />
       <main className="max-w-6xl mx-auto px-4 py-6 pb-24 md:pb-8">
         <h1 className="text-2xl font-bold mb-1">Courses in India</h1>
-        <p className="text-slate-500 text-sm mb-6">{courses?.meta.total.toLocaleString() ?? '…'} courses found</p>
+        <p className="text-slate-500 text-sm mb-6">{courses?.meta?.total?.toLocaleString() ?? courses?.data?.length ?? '…'} courses found</p>
 
         {/* Filters */}
         <div className="flex flex-wrap gap-3 mb-6">

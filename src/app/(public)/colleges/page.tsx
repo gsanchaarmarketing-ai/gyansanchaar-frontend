@@ -56,7 +56,7 @@ export default async function CollegesPage({
       <main className="max-w-7xl mx-auto px-4 py-6 pb-24 md:pb-8">
         <h1 className="text-2xl font-bold mb-1">Colleges in India</h1>
         <p className="text-slate-500 text-sm mb-6">
-          {colleges?.meta.total.toLocaleString() ?? '…'} colleges found
+          {colleges?.meta?.total?.toLocaleString() ?? colleges?.data?.length ?? '…'} colleges found
           {searchParams.q ? ` for "${searchParams.q}"` : ''}
         </p>
 
@@ -68,19 +68,19 @@ export default async function CollegesPage({
 
           {/* Results */}
           <section className="flex-1">
-            {colleges && colleges.data.length > 0 ? (
+            {colleges && colleges.data?.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {colleges.data.map(c => <CollegeCard key={c.id} college={c} />)}
                 </div>
                 {/* Pagination */}
-                {colleges.meta.last_page > 1 && (
+                {(colleges.meta?.last_page ?? 1) > 1 && (
                   <div className="mt-6 flex justify-center gap-2 text-sm">
-                    {Array.from({ length: colleges.meta.last_page }, (_, i) => i + 1).map(p => (
+                    {Array.from({ length: colleges.meta?.last_page ?? 1 }, (_, i) => i + 1).map(p => (
                       <a key={p}
                         href={`/colleges?${new URLSearchParams({ ...searchParams, page: String(p) })}`}
                         className={`px-3 py-1.5 rounded border ${
-                          p === colleges.meta.current_page
+                          p === (colleges.meta?.current_page ?? 1)
                             ? 'bg-brand-600 text-white border-brand-600'
                             : 'hover:bg-slate-50'
                         }`}>
