@@ -7,6 +7,7 @@ import {
   Zap, Clock, BadgeCheck
 } from 'lucide-react'
 import { publicApi } from '@/lib/api'
+import { getToken } from '@/lib/auth'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
   description: 'Apply to 500+ colleges across India in under 10 minutes. One form, verified data, zero agent fees.',
 }
 
-export const revalidate = 300
+export const dynamic = 'force-dynamic'
 
 /* ─── Design-system constants ─────────────────────────────────────── */
 
@@ -74,6 +75,8 @@ const STREAMS = [
 /* ─── Page ─────────────────────────────────────────────────────────── */
 
 export default async function HomePage() {
+  const token = await getToken().catch(() => null)
+  const isLoggedIn = !!token
   const [articlesRes, collegesRes] = await Promise.allSettled([
     publicApi.articles({ per_page: '4' }),
     publicApi.colleges({ per_page: '6', sort: 'nirf' }),
@@ -84,7 +87,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} />
       <main className="bg-white text-heading">
 
         {/* ── HERO ─────────────────────────────────────────────────── */}
@@ -116,9 +119,9 @@ export default async function HomePage() {
 
               {/* CTA row */}
               <div className="flex flex-wrap gap-3 mb-8">
-                <Link href="/register"
+                <Link href={isLoggedIn ? '/dashboard' : '/register'}
                   className="inline-flex items-center gap-2 bg-white text-primary font-bold px-6 py-3.5 rounded-xl hover:bg-primary-light transition-all shadow-lg text-sm">
-                  Start Free Application <ArrowRight className="w-4 h-4" />
+                  {isLoggedIn ? 'Go to Dashboard' : 'Start Free Application'} <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link href="/colleges"
                   className="inline-flex items-center gap-2 border border-white/30 text-white font-medium px-6 py-3.5 rounded-xl hover:bg-white/10 transition-all text-sm">
