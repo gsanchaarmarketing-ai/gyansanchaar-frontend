@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   MapPin, Award, Globe, Mail, BadgeCheck, GraduationCap,
   ChevronRight, MessageCircle, BookOpen, IndianRupee,
@@ -11,6 +12,125 @@ import {
 
 const TABS = ['Overview', 'Courses', 'Fees', 'Gallery', 'Placements', 'Hostel'] as const
 type Tab = typeof TABS[number]
+
+function ApplyCTA({ college }: { college: any }) {
+  const router = useRouter()
+  const [authState, setAuthState] = useState<'loading' | 'guest' | 'needsProfile' | 'ready'>('loading')
+
+  useEffect(() => {
+    // Check for auth cookie client-side
+    const token = document.cookie.match(/gs_token=([^;]+)/)?.[1]
+    if (!token) { setAuthState('guest'); return }
+
+    // Check if profile is complete
+    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'}/student/me`, {
+      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+      cache: 'no-store',
+    })
+      .then(r => r.json())
+      .then(data => {
+        setAuthState(data.can_submit_application ? 'ready' : 'needsProfile')
+      })
+      .catch(() => setAuthState('guest'))
+  }, [])
+
+  const courses = college.courses ?? []
+
+  if (authState === 'loading') {
+    return (
+      <div className="w-full py-3 rounded-xl bg-primary/20 animate-pulse text-center text-white/0 text-sm">
+        Loading...
+      </div>
+    )
+  }
+
+  if (authState === 'guest') {
+    return (
+      <Link href="/register"
+        className="block bg-white text-primary font-bold text-sm text-center py-3 rounded-xl hover:bg-primary-light transition-colors w-full">
+        Register to Apply Free →
+      </Link>
+    )
+  }
+
+  if (authState === 'needsProfile') {
+    return (
+      <Link href="/dashboard/application"
+        className="block bg-white text-primary font-bold text-sm text-center py-3 rounded-xl hover:bg-primary-light transition-colors w-full">
+        Complete Profile to Apply →
+      </Link>
+    )
+  }
+
+  // Ready to apply — show course picker
+  return <CollegeApplyPicker college={college} courses={courses} />
+}
+
+function CollegeApplyPicker({ college, courses }: { college: any; courses: any[] }) {
+  const router = useRouter()
+  const [selectedCourse, setSelectedCourse] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  async function apply() {
+    if (!selectedCourse) return
+    setLoading(true)
+    try {
+      const token = document.cookie.match(/gs_token=([^;]+)/)?.[1]
+      if (!token) { router.push('/login'); return }
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'}/student/applications`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ college_id: college.id, course_id: Number(selectedCourse) }),
+        }
+      )
+      const data = await res.json()
+      if (res.ok || res.status === 200) {
+        setSuccess(true)
+        setTimeout(() => router.push('/dashboard/applications'), 1500)
+      } else {
+        alert(data.message ?? 'Apply failed')
+      }
+    } catch { alert('Network error. Please try again.') }
+    finally { setLoading(false) }
+  }
+
+  if (success) {
+    return (
+      <div className="w-full py-3 rounded-xl bg-success/20 text-success font-semibold text-sm text-center">
+        ✓ Applied! Redirecting to dashboard…
+      </div>
+    )
+  }
+
+  if (courses.length === 0) {
+    return (
+      <button onClick={() => router.push('/dashboard/applications')}
+        className="block bg-white text-primary font-bold text-sm text-center py-3 rounded-xl w-full">
+        Apply to this College →
+      </button>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)}
+        className="w-full px-3 py-2 rounded-xl text-slate-900 text-sm border-0 bg-white/90">
+        <option value="">Select course…</option>
+        {courses.map((c: any) => (
+          <option key={c.id} value={c.id}>{c.name} ({c.level?.toUpperCase()})</option>
+        ))}
+      </select>
+      <button onClick={apply} disabled={loading || !selectedCourse}
+        className="w-full bg-white text-primary font-bold text-sm py-3 rounded-xl hover:bg-primary-light transition-colors disabled:opacity-50">
+        {loading ? 'Applying…' : 'Confirm Application →'}
+      </button>
+    </div>
+  )
+}
 
 export default function CollegeDetailClient({ college }: { college: any }) {
   const [activeTab, setActiveTab] = useState<Tab>('Overview')
@@ -390,11 +510,8 @@ export default function CollegeDetailClient({ college }: { college: any }) {
             <div className="bg-accent-gradient rounded-2xl p-6 text-white shadow-lg shadow-primary/20">
               <div className="font-bold text-lg mb-1">Apply to {college.name}</div>
               <div className="text-white/70 text-xs mb-5">Use your saved profile — no need to refill forms</div>
-              <Link href="/register"
-                className="block bg-white text-primary font-bold text-sm text-center py-3 rounded-xl hover:bg-primary-light transition-colors w-full mb-3">
-                Apply Now →
-              </Link>
-              <div className="flex items-center gap-2 text-white/60 text-xs justify-center">
+              <ApplyCTA college={college} />
+              <div className="flex items-center gap-2 text-white/60 text-xs justify-center mt-3">
                 <BadgeCheck className="w-3.5 h-3.5 text-success" /> Free · No agent fees · Direct admission
               </div>
             </div>
