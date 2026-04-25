@@ -12,8 +12,8 @@ import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 
 export const metadata: Metadata = {
-  title: 'GyanSanchaar — India\'s College Application Platform',
-  description: 'Apply to 500+ colleges across India in under 10 minutes. One form, verified data, zero agent fees.',
+  title: 'GyanSanchaar — Find Your College. Apply Free. No Agent Fees.',
+  description: 'Discover colleges and courses across India. Apply directly — no consultants, no hidden fees. Built for students in Northeast India and beyond.',
 }
 
 export const dynamic = 'force-dynamic'
@@ -26,10 +26,10 @@ const TRUST_LOGOS = [
 ]
 
 const STATS = [
-  { num: '500+',   label: 'Verified Colleges' },
-  { num: '1.2L+',  label: 'Applications Sent' },
-  { num: '98%',    label: 'Admission Success' },
-  { num: '₹0',     label: 'Agent Fees' },
+  { num: '₹0',    label: 'Application Fees' },
+  { num: '10min', label: 'To Apply' },
+  { num: '100%',  label: 'Free for Students' },
+  { num: '8',     label: 'States Covered' },
 ]
 
 const FEATURES = [
@@ -100,16 +100,17 @@ export default async function HomePage() {
             {/* Left: Heading + CTA */}
             <div className="select-none">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-[1.08] tracking-tight mb-5">
-                India's Smartest<br />
+                Find the right college.<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300">
-                  College Application
+                  Apply directly.
                 </span><br />
-                Platform
+                Zero fees. Always.
               </h1>
 
               <p className="text-white/70 text-lg leading-relaxed mb-8 max-w-md">
-                Apply to <strong className="text-white">500+ verified colleges</strong> in under 10 minutes.
-                One form. Direct admissions. Zero agent fees.
+                Discover verified colleges and courses across India.
+                One application — apply to as many as you want.
+                No consultants. No hidden charges. <strong className="text-white">Built for students who deserve better.</strong>
               </p>
 
               {/* CTA row */}
@@ -126,7 +127,7 @@ export default async function HomePage() {
 
               {/* Trust pills */}
               <div className="flex flex-wrap gap-3 text-xs text-white/60">
-                {['No registration fees', 'DPDP Act compliant', 'UGC-recognised colleges only'].map(t => (
+                {['No registration fees ever', 'DPDP Act compliant', 'UGC-recognised colleges only'].map(t => (
                   <span key={t} className="flex items-center gap-1.5">
                     <CheckCircle className="w-3.5 h-3.5 text-success" /> {t}
                   </span>
@@ -147,7 +148,7 @@ export default async function HomePage() {
                   </div>
                   {/* Cards in phone */}
                   <div className="p-3 space-y-2 bg-slate-50">
-                    {['IIT Delhi — Engineering', 'BITS Pilani — CS', 'NIT Trichy — ECE'].map((c, i) => (
+                    {['AIIMS Delhi — MBBS', 'Delhi University — BA Economics', 'IIM Ahmedabad — MBA'].map((c, i) => (
                       <div key={c} className="bg-white rounded-xl p-3 border border-border shadow-card flex items-center gap-3">
                         <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${i === 0 ? 'bg-primary' : i === 1 ? 'bg-accent' : 'bg-success'}`}>
                           <GraduationCap className="w-4 h-4 text-white" />
@@ -159,7 +160,7 @@ export default async function HomePage() {
                       </div>
                     ))}
                     <div className="bg-accent-gradient rounded-xl p-3 text-white text-center text-xs font-semibold mt-1">
-                      + Apply to 6 more colleges
+                      Browse all colleges →
                     </div>
                   </div>
                 </div>
@@ -293,7 +294,7 @@ export default async function HomePage() {
                 </div>
                 <Link href="/colleges"
                   className="hidden md:flex items-center gap-1 text-primary text-sm font-semibold hover:gap-2 transition-all">
-                  View all 500+ <ArrowRight className="w-4 h-4" />
+                  Explore all colleges <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
 
@@ -362,7 +363,7 @@ export default async function HomePage() {
 
               <div className="text-center mt-8 md:hidden">
                 <Link href="/colleges" className="text-primary text-sm font-semibold flex items-center justify-center gap-1">
-                  View all 500+ colleges <ArrowRight className="w-4 h-4" />
+                  View all colleges <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>

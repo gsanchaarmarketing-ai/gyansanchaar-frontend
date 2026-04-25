@@ -13,12 +13,13 @@ const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
 
 export const metadata: Metadata = {
   title: {
-    default: 'GyanSanchaar — India\'s College Application Platform',
+    default: 'GyanSanchaar — Find Your College. Apply Free. No Agent Fees.',
     template: '%s | GyanSanchaar',
   },
   description:
-    'Apply to 500+ verified colleges across India in under 10 minutes. One form, direct admissions, zero agent fees. DPDP Act 2023 compliant.',
-  keywords: ['colleges in India', 'admission 2026', 'college application', 'engineering colleges', 'MBA colleges', 'NIRF ranking', 'NEET colleges', 'JEE colleges'],
+    'Discover colleges and courses across India. Apply directly — no consultants, no hidden fees. Built for students in Northeast India and beyond.',
+  keywords: ['colleges in India', 'admission 2026', 'college application', 'engineering colleges', 'MBA colleges', 'NIRF ranking', 'NEET colleges', 'JEE colleges', 'Northeast India colleges', 'Assam colleges', 'Meghalaya colleges', 'free college application']
+,
   metadataBase: new URL(BASE),
   openGraph: {
     type: 'website',
