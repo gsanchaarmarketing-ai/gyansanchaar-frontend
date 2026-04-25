@@ -1,35 +1,44 @@
 import { NextResponse } from 'next/server'
+import { publicApi } from '@/lib/api'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const BACKEND = 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
-  const apiUrl = process.env.API_INTERNAL_URL ?? process.env.NEXT_PUBLIC_API_URL ?? BACKEND
+  const result: any = { steps: [] }
 
-  const result: any = { apiUrl, tests: {} }
-
-  for (const [name, path] of [
-    ['colleges', '/public/colleges?per_page=2'],
-    ['courses',  '/public/courses?per_page=2'],
-    ['exams',    '/public/exams'],
-  ]) {
-    try {
-      const r = await fetch(`${apiUrl}${path}`, { cache: 'no-store', signal: AbortSignal.timeout(8000) })
-      const data = await r.json()
-      result.tests[name] = {
-        httpStatus: r.status,
-        topLevelKeys: Object.keys(data),
-        hasMeta: 'meta' in data,
-        dataIsArray: Array.isArray(data.data),
-        dataLength: Array.isArray(data.data) ? data.data.length : 'N/A',
-        firstItem: Array.isArray(data.data) && data.data[0]
-          ? Object.fromEntries(Object.entries(data.data[0]).slice(0, 8))
-          : null,
+  // Step 1: Use the actual publicApi.colleges() function as the page does
+  try {
+    const colleges = await publicApi.colleges({ per_page: '12' })
+    result.steps.push({
+      step: 1,
+      ok: true,
+      shape: {
+        hasData: 'data' in colleges,
+        hasMeta: 'meta' in colleges,
+        dataKeys: colleges.data?.[0] ? Object.keys(colleges.data[0]) : [],
+        firstCollege: colleges.data?.[0] ?? null,
       }
-    } catch (e: any) {
-      result.tests[name] = { error: e.message }
-    }
+    })
+  } catch (e: any) {
+    result.steps.push({ step: 1, error: e.message, stack: e.stack?.split('\n').slice(0, 5) })
+    return NextResponse.json(result)
   }
 
-  return NextResponse.json(result, { status: 200 })
+  // Step 2: states
+  try {
+    const r = await publicApi.states()
+    result.steps.push({ step: 2, ok: true, count: r.data?.length })
+  } catch (e: any) {
+    result.steps.push({ step: 2, error: e.message })
+  }
+
+  // Step 3: streams
+  try {
+    const r = await publicApi.streams()
+    result.steps.push({ step: 3, ok: true, count: r.data?.length })
+  } catch (e: any) {
+    result.steps.push({ step: 3, error: e.message })
+  }
+
+  return NextResponse.json(result)
 }
