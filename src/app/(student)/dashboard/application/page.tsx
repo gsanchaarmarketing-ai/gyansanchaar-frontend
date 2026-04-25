@@ -23,7 +23,7 @@ export default async function ApplicationFormPage() {
 
   return (
     <>
-      <Header isLoggedIn />
+      <Header />
       <main className="max-w-xl mx-auto px-4 py-6 pb-28 md:pb-10">
         <h1 className="text-xl font-bold mb-1">Application Form</h1>
         <p className="text-slate-500 text-sm mb-6">

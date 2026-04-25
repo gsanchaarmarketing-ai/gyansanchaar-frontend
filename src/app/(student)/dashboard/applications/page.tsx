@@ -14,7 +14,7 @@ export default async function ApplicationsPage() {
 
   return (
     <>
-      <Header isLoggedIn />
+      <Header />
       <main className="max-w-3xl mx-auto px-4 py-6 pb-24 md:pb-10">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-xl font-bold">My Applications</h1>

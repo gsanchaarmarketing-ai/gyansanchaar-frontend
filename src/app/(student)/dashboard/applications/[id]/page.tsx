@@ -23,7 +23,7 @@ export default async function ApplicationDetailPage({ params }: { params: { id: 
 
   return (
     <>
-      <Header isLoggedIn />
+      <Header />
       <main className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-10">
         <div className="text-xs text-slate-500 mb-3">
           <a href="/dashboard/applications" className="hover:text-primary">← My Applications</a>

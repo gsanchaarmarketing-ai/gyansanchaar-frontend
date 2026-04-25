@@ -14,7 +14,7 @@ export default async function ProfilePage() {
 
   return (
     <>
-      <Header isLoggedIn />
+      <Header />
       <main className="max-w-xl mx-auto px-4 py-6 pb-24 md:pb-10">
         <h1 className="text-xl font-bold mb-5">My Profile</h1>
         <ProfileForm user={me.user} states={statesRes.data} token={token} />

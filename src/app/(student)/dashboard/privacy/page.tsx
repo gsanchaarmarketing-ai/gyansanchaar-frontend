@@ -19,7 +19,7 @@ export default async function PrivacyPage() {
 
   return (
     <>
-      <Header isLoggedIn />
+      <Header />
       <main className="max-w-xl mx-auto px-4 py-6 pb-24 md:pb-10">
         <h1 className="text-xl font-bold mb-1">Privacy & Data</h1>
         <p className="text-slate-500 text-sm mb-6">Your rights under the Digital Personal Data Protection Act, 2023</p>

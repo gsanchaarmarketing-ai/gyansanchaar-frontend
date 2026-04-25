@@ -16,7 +16,7 @@ export default async function ParentalConsentPage() {
 
   return (
     <>
-      <Header isLoggedIn />
+      <Header />
       <main className="max-w-md mx-auto px-4 py-8 pb-24 md:pb-10">
         <div className="text-center mb-6">
           <div className="text-3xl mb-2">👨‍👩‍👧</div>
