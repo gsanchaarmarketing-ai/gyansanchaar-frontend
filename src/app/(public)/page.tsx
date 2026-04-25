@@ -87,7 +87,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} />
+      <Header />
       <main className="bg-white text-heading">
 
         {/* ── HERO ─────────────────────────────────────────────────── */}
@@ -98,7 +98,7 @@ export default async function HomePage() {
 
           <div className="relative max-w-container mx-auto px-6 py-20 md:py-28 grid md:grid-cols-2 gap-12 items-center">
             {/* Left: Heading + CTA */}
-            <div>
+            <div className="select-none">
               <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white/80 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 tracking-wider uppercase">
                 <Zap className="w-3.5 h-3.5 text-warning" />
                 2026 Admissions Open

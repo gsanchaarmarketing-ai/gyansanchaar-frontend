@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
@@ -133,7 +133,60 @@ function CollegeApplyPicker({ college, courses }: { college: any; courses: any[]
   )
 }
 
-export default function CollegeDetailClient({ college }: { college: any }) {
+function CourseApplyButton({ college, course }: { college: any; course: any }) {
+  const router = useRouter()
+  const [state, setState] = useState<'idle'|'loading'|'done'>('idle')
+
+  async function apply() {
+    const token = document.cookie.match(/gs_token=([^;]+)/)?.[1]
+    if (!token) { router.push('/register'); return }
+
+    setState('loading')
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
+
+      // Check profile complete
+      const meRes = await fetch(`${apiUrl}/student/me`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        cache: 'no-store',
+      })
+      const me = await meRes.json()
+      if (!me.can_submit_application) {
+        router.push('/dashboard/application')
+        return
+      }
+
+      // Apply
+      const res = await fetch(`${apiUrl}/student/applications`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ college_id: college.id, course_id: course.id }),
+      })
+      const data = await res.json()
+      if (res.ok || res.status === 200) {
+        setState('done')
+        setTimeout(() => router.push('/dashboard/applications'), 1200)
+      } else {
+        alert(data.message ?? 'Apply failed')
+        setState('idle')
+      }
+    } catch {
+      alert('Network error. Try again.')
+      setState('idle')
+    }
+  }
+
+  if (state === 'done') return (
+    <span className="text-success text-xs font-bold px-3 py-1.5 bg-success/10 rounded-lg">✓ Applied!</span>
+  )
+
+  return (
+    <button onClick={apply} disabled={state === 'loading'}
+      className="flex-shrink-0 bg-primary text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-primary-hover transition-colors disabled:opacity-60">
+      {state === 'loading' ? '…' : 'Apply'}
+    </button>
+  )
+}
   const [activeTab, setActiveTab] = useState<Tab>('Overview')
   const courses = college.courses ?? []
 
@@ -340,32 +393,22 @@ export default function CollegeDetailClient({ college }: { college: any }) {
               {courses.length === 0
                 ? <p className="text-muted text-sm">Course information not available yet.</p>
                 : (
-                  <div className="overflow-x-auto rounded-xl border border-border">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-slate-50 border-b border-border">
-                          <th className="text-left px-4 py-3 text-xs font-bold text-heading uppercase tracking-wider">Course</th>
-                          <th className="text-left px-4 py-3 text-xs font-bold text-heading uppercase tracking-wider">Level</th>
-                          <th className="text-left px-4 py-3 text-xs font-bold text-heading uppercase tracking-wider">Duration</th>
-                          <th className="text-right px-4 py-3 text-xs font-bold text-heading uppercase tracking-wider">Fee/Year</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-border">
-                        {courses.map((c: any) => (
-                          <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="px-4 py-3 font-medium text-heading">{c.name}</td>
-                            <td className="px-4 py-3">
-                              <span className="bg-primary-light text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{c.level}</span>
-                            </td>
-                            <td className="px-4 py-3 text-body">{c.duration_months}mo</td>
-                            <td className="px-4 py-3 text-right font-semibold text-heading">
-                              {c.pivot?.fee ? `₹${Number(c.pivot.fee).toLocaleString('en-IN')}`
-                                : c.default_fee ? `₹${Number(c.default_fee).toLocaleString('en-IN')}` : '—'}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="space-y-3">
+                    {courses.map((c: any) => (
+                      <div key={c.id} className="bg-white border border-border rounded-xl p-4 flex items-center justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-heading text-sm">{c.name}</div>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            <span className="bg-primary-light text-primary text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{c.level}</span>
+                            {c.duration_months && <span className="text-muted text-xs">{c.duration_months}mo</span>}
+                            {(c.pivot?.fee ?? c.default_fee) && (
+                              <span className="text-muted text-xs">₹{Number(c.pivot?.fee ?? c.default_fee).toLocaleString('en-IN')}/yr</span>
+                            )}
+                          </div>
+                        </div>
+                        <CourseApplyButton college={college} course={c} />
+                      </div>
+                    ))}
                   </div>
                 )
               }

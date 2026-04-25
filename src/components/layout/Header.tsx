@@ -1,18 +1,22 @@
-'use client'
-
 import Link from 'next/link'
 import { GraduationCap } from 'lucide-react'
+import { cookies } from 'next/headers'
 
 const navLinks = [
-  { href: '/colleges', label: 'Colleges' },
-  { href: '/courses',  label: 'Courses' },
-  { href: '/exams',    label: 'Exams' },
-  { href: '/articles', label: 'Articles' },
+  { href: '/colleges',    label: 'Colleges' },
+  { href: '/courses',     label: 'Courses' },
+  { href: '/exams',       label: 'Exams' },
+  { href: '/articles',    label: 'Articles' },
 ]
 
-interface HeaderProps { isLoggedIn?: boolean }
+// Server component — reads cookie directly, no prop needed
+export default async function Header() {
+  let isLoggedIn = false
+  try {
+    const jar = await cookies()
+    isLoggedIn = !!jar.get('gs_token')?.value
+  } catch {}
 
-export default function Header({ isLoggedIn }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
       <div className="max-w-container mx-auto px-4 md:px-6 h-14 md:h-16 flex items-center justify-between gap-4 md:gap-8">
@@ -25,7 +29,7 @@ export default function Header({ isLoggedIn }: HeaderProps) {
           <span className="font-bold text-heading text-lg tracking-tight">GyanSanchaar</span>
         </Link>
 
-        {/* Desktop nav links */}
+        {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1 flex-1">
           {navLinks.map(l => (
             <Link key={l.href} href={l.href}
@@ -44,19 +48,18 @@ export default function Header({ isLoggedIn }: HeaderProps) {
             </Link>
           ) : (
             <>
-              <Link href="/login"
-                className="text-sm font-medium text-body hover:text-primary transition-colors px-3 py-2">
+              <Link href="/login" className="text-sm font-medium text-body hover:text-primary px-3 py-2">
                 Sign In
               </Link>
               <Link href="/register"
-                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm">
                 Apply Free →
               </Link>
             </>
           )}
         </div>
 
-        {/* Mobile: show login/apply buttons inline (no hamburger — bottom nav handles mobile nav) */}
+        {/* Mobile actions — no hamburger, bottom nav handles navigation */}
         <div className="md:hidden flex items-center gap-2">
           {isLoggedIn ? (
             <Link href="/dashboard"
