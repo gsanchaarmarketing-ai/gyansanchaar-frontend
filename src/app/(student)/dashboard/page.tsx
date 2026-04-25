@@ -3,6 +3,7 @@ import { getToken } from '@/lib/auth'
 import { studentApi } from '@/lib/api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
+import FirstVisitModal from '@/components/dashboard/FirstVisitModal'
 import Link from 'next/link'
 import {
   ArrowRight, FileText, Building2, CheckCircle2,
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
   return (
     <>
       <Header />
+      <FirstVisitModal profileComplete={profileComplete} />
       <main className="max-w-3xl mx-auto px-4 py-5 pb-28 md:pb-10">
 
         {/* Greeting */}
