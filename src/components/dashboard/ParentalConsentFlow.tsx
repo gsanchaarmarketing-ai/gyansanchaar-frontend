@@ -1,5 +1,5 @@
-import { getClientToken } from '@/lib/client-auth'
 'use client'
+import { getClientToken } from '@/lib/client-auth'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'

@@ -1,5 +1,5 @@
-import { getClientToken } from '@/lib/client-auth'
 'use client'
+import { getClientToken } from '@/lib/client-auth'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { studentApi } from '@/lib/api'
