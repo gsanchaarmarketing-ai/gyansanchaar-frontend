@@ -6,7 +6,7 @@ import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
 import {
   ArrowRight, FileText, Building2, CheckCircle2,
-  Clock, AlertCircle, Calendar, Download, Bell,
+  Clock, AlertCircle, Calendar, Download, MessageCircle,
   ChevronRight, User, Shield, BookOpen, Sparkles
 } from 'lucide-react'
 import { statusColor, statusLabel } from '@/lib/utils'
@@ -31,7 +31,7 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <Header isLoggedIn />
+      <Header />
       <main className="max-w-3xl mx-auto px-4 py-5 pb-28 md:pb-10">
 
         {/* Greeting */}
@@ -163,9 +163,9 @@ export default async function DashboardPage() {
                       </div>
                     )}
 
-                    <Link href={`/dashboard/applications/${app.id}`}
-                      className="flex items-center gap-1 text-muted text-xs px-3 py-1.5 border border-border rounded-lg">
-                      View details <ChevronRight className="w-3 h-3" />
+                    <Link href={`/dashboard/counselling?application_id=${app.id}`}
+                      className="flex items-center gap-1.5 bg-primary-light text-primary px-3 py-1.5 rounded-lg text-xs font-semibold">
+                      <Calendar className="w-3.5 h-3.5" /> Book Counselling
                     </Link>
                   </div>
                 </div>
@@ -185,7 +185,8 @@ export default async function DashboardPage() {
           <h2 className="font-bold text-heading mb-3">Quick Links</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { href: '/dashboard/application', icon: User,      label: 'My Profile',      sub: 'Edit details & documents' },
+              { href: '/dashboard/counselling', icon: MessageCircle, label: 'Counselling', sub: 'Book college sessions' },
+              { href: '/dashboard/application', icon: User, label: 'My Profile', sub: 'Edit details && documents' },
               { href: '/dashboard/documents',   icon: FileText,  label: 'Documents',       sub: 'Marksheets & certificates' },
               { href: '/dashboard/notifications', icon: Bell,    label: 'Notifications',   sub: 'Status updates' },
               { href: '/dashboard/privacy',     icon: Shield,    label: 'Privacy',         sub: 'Data & consent settings' },

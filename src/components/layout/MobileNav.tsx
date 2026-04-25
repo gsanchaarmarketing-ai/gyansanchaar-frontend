@@ -6,11 +6,11 @@ import { Home, Building2, BookOpen, ClipboardList, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const items = [
-  { href: '/', icon: Home, label: 'Home' },
-  { href: '/colleges', icon: Building2, label: 'Colleges' },
-  { href: '/courses', icon: BookOpen, label: 'Courses' },
-  { href: '/exams', icon: ClipboardList, label: 'Exams' },
-  { href: '/dashboard', icon: User, label: 'Profile' },
+  { href: '/',          icon: Home,         label: 'Home' },
+  { href: '/colleges',  icon: Building2,    label: 'Colleges' },
+  { href: '/courses',   icon: BookOpen,     label: 'Courses' },
+  { href: '/exams',     icon: ClipboardList,label: 'Exams' },
+  { href: '/dashboard', icon: User,         label: 'Profile' },
 ]
 
 export default function MobileNav() {
