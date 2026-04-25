@@ -186,9 +186,8 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-2 gap-3">
             {[
               { href: '/dashboard/counselling', icon: MessageCircle, label: 'Counselling', sub: 'Book college sessions' },
-              { href: '/dashboard/application', icon: User, label: 'My Profile', sub: 'Edit details && documents' },
+              { href: '/dashboard/application', icon: User, label: 'My Profile', sub: 'Edit details & documents' },
               { href: '/dashboard/documents',   icon: FileText,  label: 'Documents',       sub: 'Marksheets & certificates' },
-              { href: '/dashboard/notifications', icon: Bell,    label: 'Notifications',   sub: 'Status updates' },
               { href: '/dashboard/privacy',     icon: Shield,    label: 'Privacy',         sub: 'Data & consent settings' },
             ].map(({ href, icon: Icon, label, sub }) => (
               <Link key={href} href={href}
