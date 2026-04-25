@@ -7,8 +7,9 @@ import {
   MapPin, Award, Globe, Mail, BadgeCheck, GraduationCap,
   ChevronRight, MessageCircle, BookOpen, IndianRupee,
   TrendingUp, Home, ArrowLeft, Star, Users, Clock,
-  Phone, Play, Image as ImageIcon, ExternalLink
+  ExternalLink
 } from 'lucide-react'
+import GalleryCarousel from './GalleryCarousel'
 
 const TABS = ['Overview', 'Courses', 'Fees', 'Gallery', 'Placements', 'Hostel'] as const
 type Tab = typeof TABS[number]
@@ -134,24 +135,10 @@ function CollegeApplyPicker({ college, courses }: { college: any; courses: any[]
 
 export default function CollegeDetailClient({ college }: { college: any }) {
   const [activeTab, setActiveTab] = useState<Tab>('Overview')
-  const [lightbox, setLightbox] = useState<string | null>(null)
-
   const courses = college.courses ?? []
-
-  // Sample gallery — replaced by real data when admin uploads
-  const gallery: string[] = college.gallery ?? []
-  const hasGallery = gallery.length > 0
 
   return (
     <main className="bg-white min-h-screen pb-24 md:pb-0">
-
-      {/* LIGHTBOX */}
-      {lightbox && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
-          onClick={() => setLightbox(null)}>
-          <img src={lightbox} alt="Campus" className="max-w-full max-h-full rounded-xl object-contain" />
-        </div>
-      )}
 
       {/* HERO */}
       <div className="bg-gradient-to-br from-[#0F172A] via-[#1E3A8A] to-[#1D4ED8] text-white">
@@ -321,53 +308,28 @@ export default function CollegeDetailClient({ college }: { college: any }) {
 
           {/* Gallery Tab */}
           {activeTab === 'Gallery' && (
-            <div className="space-y-6">
-              <h2 className="text-lg font-bold text-heading mb-4">Campus Gallery</h2>
+            <div className="space-y-4">
+              <h2 className="text-lg font-bold text-heading">Campus Gallery</h2>
+              {(() => {
+                // Build gallery items from gallery array + campus video
+                const items: { type: 'image' | 'video'; url: string }[] = []
+                if (college.campus_video_url) items.push({ type: 'video', url: college.campus_video_url })
+                if (Array.isArray(college.gallery)) {
+                  college.gallery.forEach((url: string) => items.push({ type: 'image', url }))
+                }
 
-              {/* Campus video placeholder */}
-              <div className="relative bg-slate-900 rounded-2xl overflow-hidden aspect-video flex items-center justify-center">
-                {college.campus_video_url ? (
-                  <iframe
-                    src={college.campus_video_url}
-                    className="w-full h-full"
-                    allow="autoplay; fullscreen"
-                    allowFullScreen
-                    title="Campus Video"
-                  />
-                ) : (
-                  <div className="text-center text-white/50 p-8">
-                    <Play className="w-12 h-12 mx-auto mb-3 text-white/20" />
-                    <div className="font-semibold text-sm">Campus Video</div>
-                    <div className="text-xs mt-1">Video tour coming soon</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Photo grid */}
-              {hasGallery ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {gallery.map((img: string, i: number) => (
-                    <button key={i} onClick={() => setLightbox(img)}
-                      className="aspect-square rounded-xl overflow-hidden border border-border hover:opacity-90 transition-opacity">
-                      <img src={img} alt={`${college.name} campus ${i + 1}`}
-                        className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i}
-                      className="aspect-square rounded-xl border-2 border-dashed border-border bg-slate-50 flex flex-col items-center justify-center text-muted">
-                      <ImageIcon className="w-6 h-6 mb-1 opacity-30" />
-                      <div className="text-[10px]">Photo {i + 1}</div>
+                if (items.length === 0) {
+                  return (
+                    <div className="bg-slate-50 border-2 border-dashed border-border rounded-2xl p-12 text-center">
+                      <div className="text-4xl mb-3">🏛️</div>
+                      <div className="font-semibold text-heading mb-1">Campus gallery coming soon</div>
+                      <div className="text-muted text-sm">Photos and video tour will appear here once uploaded by the college.</div>
                     </div>
-                  ))}
-                  <div className="col-span-2 md:col-span-3 text-center text-xs text-muted py-2">
-                    Gallery photos will appear here once uploaded by the college
-                  </div>
-                </div>
-              )}
+                  )
+                }
+
+                return <GalleryCarousel items={items} collegeName={college.name} />
+              })()}
             </div>
           )}
 
