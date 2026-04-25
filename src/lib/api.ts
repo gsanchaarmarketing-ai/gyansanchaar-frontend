@@ -67,39 +67,40 @@ async function request<T>(
 
 export const publicApi = {
   colleges: (params?: Record<string, string>) =>
-    request<CollegesResponse>(`/public/colleges?${new URLSearchParams(params)}`),
+    request<CollegesResponse>(`/public/colleges?${new URLSearchParams(params)}`, { cache: 'no-store' }),
 
   college: (slug: string) =>
-    request<{ data: College }>(`/public/colleges/${slug}`),
+    request<{ data: College }>(`/public/colleges/${slug}`, { next: { revalidate: 300 } }),
 
   courses: (params?: Record<string, string>) =>
-    request<CoursesResponse>(`/public/courses?${new URLSearchParams(params)}`),
+    request<CoursesResponse>(`/public/courses?${new URLSearchParams(params)}`, { cache: 'no-store' }),
 
   course: (slug: string) =>
-    request<{ data: Course }>(`/public/courses/${slug}`),
+    request<{ data: Course }>(`/public/courses/${slug}`, { next: { revalidate: 300 } }),
 
   articles: (params?: Record<string, string>) =>
-    request<ArticlesResponse>(`/public/articles?${new URLSearchParams(params)}`),
+    request<ArticlesResponse>(`/public/articles?${new URLSearchParams(params)}`, { cache: 'no-store' }),
 
   article: (slug: string) =>
-    request<{ data: Article }>(`/public/articles/${slug}`),
+    request<{ data: Article }>(`/public/articles/${slug}`, { next: { revalidate: 300 } }),
 
   states: () => request<{ data: State[] }>('/public/states', { next: { revalidate: 86400 } }),
 
   streams: () => request<{ data: Stream[] }>('/public/streams', { next: { revalidate: 86400 } }),
 
-  exams: (params?: Record<string, string>) => request<ExamsResponse>('/public/exams', { next: { revalidate: 3600 } }),
+  exams: (params?: Record<string, string>) =>
+    request<ExamsResponse>('/public/exams', { cache: 'no-store' }),
 
   exam: (slug: string) =>
-    request<{ data: Exam }>(`/public/exams/${slug}`, { next: { revalidate: 3600 } }),
+    request<{ data: Exam }>(`/public/exams/${slug}`, { next: { revalidate: 300 } }),
 
   counsellors: (params?: Record<string, string>) =>
-    request<CounsellorsResponse>(`/public/counsellors?${new URLSearchParams(params)}`),
+    request<CounsellorsResponse>(`/public/counsellors?${new URLSearchParams(params)}`, { cache: 'no-store' }),
 
   counsellor: (slug: string) =>
-    request<{ data: Counsellor }>(`/public/counsellors/${slug}`),
+    request<{ data: Counsellor }>(`/public/counsellors/${slug}`, { next: { revalidate: 300 } }),
 
-  grievanceOfficer: () => request<GrievanceOfficer>('/public/grievance-officer'),
+  grievanceOfficer: () => request<GrievanceOfficer>('/public/grievance-officer', { next: { revalidate: 86400 } }),
 
   grievanceStatus: (ticket: string) =>
     request<GrievanceStatus>(`/student/grievance/${ticket}`),
