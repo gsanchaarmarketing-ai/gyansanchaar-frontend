@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { GraduationCap } from 'lucide-react'
+import { getClientToken } from '@/lib/client-auth'
 
 const navLinks = [
   { href: '/colleges', label: 'Colleges' },
@@ -16,7 +17,7 @@ export default function HeaderClient() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    setIsLoggedIn(!!document.cookie.match(/gs_token=/))
+    getClientToken().then(token => setIsLoggedIn(!!token))
   }, [])
 
   return (

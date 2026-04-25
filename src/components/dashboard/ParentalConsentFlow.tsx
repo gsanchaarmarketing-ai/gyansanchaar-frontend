@@ -1,3 +1,4 @@
+import { getClientToken } from '@/lib/client-auth'
 'use client'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -16,7 +17,7 @@ const schema1 = z.object({
 })
 type Form1 = z.infer<typeof schema1>
 
-function getToken() { return document.cookie.match(/gs_token=([^;]+)/)?.[1] ?? '' }
+async function getToken() { return getClientToken() }
 
 export default function ParentalConsentFlow({ token, existingParent }: { token: string; existingParent: any }) {
   const router = useRouter()

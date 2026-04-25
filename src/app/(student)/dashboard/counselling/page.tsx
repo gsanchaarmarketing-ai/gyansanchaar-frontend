@@ -7,9 +7,11 @@ import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
 import { Calendar, Clock, MessageCircle, X, RotateCw, CheckCircle2, ArrowLeft } from 'lucide-react'
 
+import { getClientToken } from '@/lib/client-auth'
+
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
 
-function getToken() { return document.cookie.match(/gs_token=([^;]+)/)?.[1] ?? '' }
+function getToken() { return getClientToken() }
 
 const TIME_SLOTS = [
   '09:00','09:30','10:00','10:30','11:00','11:30',
@@ -35,19 +37,19 @@ export default function CounsellingPage() {
   const [showForm,     setShowForm]     = useState(!!appId)
 
   useEffect(() => {
-    const token = getToken()
-    if (!token) { router.push('/login'); return }
+    getClientToken().then(token => {
+      if (!token) { router.push('/login'); return }
 
-    Promise.all([
-      fetch(`${API}/student/applications`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' }),
-      fetch(`${API}/student/counselling`,  { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' }),
-    ]).then(async ([a, c]) => {
-      const appsData = await a.json()
-      const sessData = await c.json()
-      // Only active applications can book counselling
-      setApplications((appsData.data ?? []).filter((a: any) => ['applied','approved','interview_scheduled'].includes(a.status)))
-      setSessions(sessData.data ?? [])
-    }).finally(() => setLoading(false))
+      Promise.all([
+        fetch(`${API}/student/applications`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' }),
+        fetch(`${API}/student/counselling`,  { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' }),
+      ]).then(async ([a, c]) => {
+        const appsData = await a.json()
+        const sessData = await c.json()
+        setApplications((appsData.data ?? []).filter((a: any) => ['applied','approved','interview_scheduled'].includes(a.status)))
+        setSessions(sessData.data ?? [])
+      }).finally(() => setLoading(false))
+    })
   }, [router])
 
   async function bookSession() {
@@ -56,7 +58,7 @@ export default function CounsellingPage() {
     }
     const endTime = TIME_SLOTS[TIME_SLOTS.indexOf(startTime) + 1] ?? '18:00'
     setBooking(true)
-    const token = getToken()
+    const token = await getClientToken()
     try {
       const res = await fetch(`${API}/student/counselling`, {
         method: 'POST',
@@ -85,7 +87,7 @@ export default function CounsellingPage() {
 
   async function cancelSession(id: number) {
     if (!confirm('Cancel this counselling session?')) return
-    const token = getToken()
+    const token = await getClientToken()
     await fetch(`${API}/student/counselling/${id}/cancel`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },

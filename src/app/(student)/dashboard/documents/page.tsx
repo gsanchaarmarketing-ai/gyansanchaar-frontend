@@ -1,3 +1,4 @@
+import { getClientToken } from '@/lib/client-auth'
 'use client'
 
 import { useRef, useState } from 'react'
@@ -17,8 +18,6 @@ const DOC_TYPES = [
   { value: 'other', label: 'Other' },
 ]
 
-function getToken() { return typeof document !== 'undefined' ? document.cookie.match(/gs_token=([^;]+)/)?.[1] ?? '' : '' }
-
 export default function DocumentsPage() {
   const qc = useQueryClient()
   const [type, setType] = useState('marksheet_10')
@@ -27,7 +26,7 @@ export default function DocumentsPage() {
 
   const { data: docs, isLoading } = useQuery({
     queryKey: ['documents'],
-    queryFn: () => studentApi.documents(getToken()),
+    queryFn: async () => studentApi.documents(await getClientToken() ?? ''),
   })
 
   async function upload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -38,7 +37,7 @@ export default function DocumentsPage() {
       const fd = new FormData()
       fd.append('file', file)
       fd.append('type', type)
-      await studentApi.uploadDocument(getToken(), fd)
+      await studentApi.uploadDocument(await getClientToken() ?? '', fd)
       qc.invalidateQueries({ queryKey: ['documents'] })
       toast.success('Document uploaded')
       if (fileRef.current) fileRef.current.value = ''
@@ -47,14 +46,14 @@ export default function DocumentsPage() {
   }
 
   const deleteMut = useMutation({
-    mutationFn: (id: number) => studentApi.deleteDocument(getToken(), id),
+    mutationFn: async (id: number) => studentApi.deleteDocument(await getClientToken() ?? '', id),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['documents'] }); toast.success('Deleted') },
     onError: (e: any) => toast.error(e.message),
   })
 
   async function download(id: number, name: string) {
     try {
-      const { url } = await studentApi.documentDownload(getToken(), id)
+      const { url } = await studentApi.documentDownload(await getClientToken() ?? '', id)
       const a = document.createElement('a'); a.href = url; a.download = name; a.click()
     } catch (e: any) { toast.error(e.message) }
   }

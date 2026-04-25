@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { getClientToken } from '@/lib/client-auth'
 import {
   MapPin, Award, Globe, Mail, BadgeCheck, GraduationCap,
   ChevronRight, MessageCircle, BookOpen, IndianRupee,
@@ -19,20 +20,20 @@ function ApplyCTA({ college }: { college: any }) {
   const [authState, setAuthState] = useState<'loading' | 'guest' | 'needsProfile' | 'ready'>('loading')
 
   useEffect(() => {
-    // Check for auth cookie client-side
-    const token = document.cookie.match(/gs_token=([^;]+)/)?.[1]
-    if (!token) { setAuthState('guest'); return }
+    getClientToken().then(token => {
+      if (!token) { setAuthState('guest'); return }
 
-    // Check if profile is complete
-    fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'}/student/me`, {
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-      cache: 'no-store',
-    })
-      .then(r => r.json())
-      .then(data => {
-        setAuthState(data.can_submit_application ? 'ready' : 'needsProfile')
+      // Check if profile is complete
+      fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'}/student/me`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        cache: 'no-store',
       })
-      .catch(() => setAuthState('guest'))
+        .then(r => r.json())
+        .then(data => {
+          setAuthState(data.can_submit_application ? 'ready' : 'needsProfile')
+        })
+        .catch(() => setAuthState('guest'))
+    })
   }, [])
 
   const courses = college.courses ?? []
@@ -77,7 +78,7 @@ function CollegeApplyPicker({ college, courses }: { college: any; courses: any[]
     if (!selectedCourse) return
     setLoading(true)
     try {
-      const token = document.cookie.match(/gs_token=([^;]+)/)?.[1]
+      const token = await getClientToken()
       if (!token) { router.push('/login'); return }
 
       const res = await fetch(
@@ -138,7 +139,7 @@ function CourseApplyButton({ college, course }: { college: any; course: any }) {
   const [state, setState] = useState<'idle'|'loading'|'done'>('idle')
 
   async function apply() {
-    const token = document.cookie.match(/gs_token=([^;]+)/)?.[1]
+    const token = await getClientToken()
     if (!token) { router.push('/register'); return }
 
     setState('loading')

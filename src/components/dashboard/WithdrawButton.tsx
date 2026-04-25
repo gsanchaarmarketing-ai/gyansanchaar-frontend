@@ -1,3 +1,4 @@
+import { getClientToken } from '@/lib/client-auth'
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -12,7 +13,7 @@ export default function WithdrawButton({ applicationId }: { applicationId: numbe
   async function withdraw() {
     setLoading(true)
     try {
-      const token = document.cookie.match(/gs_token=([^;]+)/)?.[1] ?? ''
+      const token = await getClientToken() ?? ''
       await studentApi.withdrawApplication(token, applicationId)
       toast.success('Application withdrawn')
       router.refresh()

@@ -1,3 +1,4 @@
+import { getClientToken } from '@/lib/client-auth'
 'use client'
 
 import { useState } from 'react'
@@ -17,7 +18,7 @@ export default function ApplyButton({ collegeId, collegeName, courses }: Props) 
     if (!selectedCourse) { toast.error('Please select a course'); return }
     setLoading(true)
     try {
-      const token = document.cookie.match(/gs_token=([^;]+)/)?.[1]
+      const token = await getClientToken()
       if (!token) { router.push('/login'); return }
       await studentApi.applyToCollege(token, { college_id: collegeId, course_id: Number(selectedCourse) })
       toast.success(`Applied to ${collegeName}!`)
