@@ -14,30 +14,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/courses`,          lastModified: now, changeFrequency: 'daily',   priority: 0.9 },
     { url: `${BASE}/exams`,            lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${BASE}/articles`,         lastModified: now, changeFrequency: 'daily',   priority: 0.8 },
-    { url: `${BASE}/counsellors`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
-    { url: `${BASE}/about`,            lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${BASE}/contact`,          lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${BASE}/about`,            lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE}/contact`,          lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE}/grievance`,        lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE}/privacy`,          lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${BASE}/terms`,            lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${BASE}/refund`,           lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
     { url: `${BASE}/grievance-policy`, lastModified: now, changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${BASE}/grievance`,        lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    // /counsellors removed — counsellors are now college-specific
   ]
 
   const dynamic: MetadataRoute.Sitemap = []
 
   try {
-    const colleges = await publicApi.colleges({ per_page: '200' })
+    const colleges = await publicApi.colleges({ per_page: '500' })
     colleges.data.forEach(c => dynamic.push({
       url: `${BASE}/colleges/${c.slug}`,
-      lastModified: now,
+      lastModified: c.updated_at ? new Date(c.updated_at) : now,
       changeFrequency: 'weekly',
       priority: 0.85,
     }))
   } catch {}
 
   try {
-    const courses = await publicApi.courses({ per_page: '200' })
+    const courses = await publicApi.courses({ per_page: '500' })
     courses.data.forEach(c => dynamic.push({
       url: `${BASE}/courses/${c.slug}`,
       lastModified: now,
@@ -47,10 +47,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {}
 
   try {
-    const articles = await publicApi.articles({ per_page: '200' })
+    const articles = await publicApi.articles({ per_page: '500' })
     articles.data.forEach(a => dynamic.push({
       url: `${BASE}/articles/${a.slug}`,
-      lastModified: a.published_at ? new Date(a.published_at) : now,
+      lastModified: a.updated_at ? new Date(a.updated_at) : now,
       changeFrequency: 'monthly',
       priority: 0.7,
     }))
