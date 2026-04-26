@@ -272,6 +272,29 @@ export interface College {
   logo_path: string | null
   website: string | null
   contact_email: string | null
+  contact_phone: string | null
+  address: string | null
+  gallery: string[] | null
+  campus_video_url: string | null
+  fee_notes: string | null
+  placement_data: {
+    rate?: number
+    avg_package?: number
+    highest_package?: number
+    top_recruiters?: string
+    year?: number
+    notes?: string
+  } | null
+  hostel_info: {
+    boys_hostel?: boolean
+    girls_hostel?: boolean
+    capacity?: number
+    fee_per_year?: number
+    mess_available?: boolean
+    ac_rooms?: boolean
+    curfew?: string
+    notes?: string
+  } | null
   courses?: Course[]
   streams?: Stream[]
 }
