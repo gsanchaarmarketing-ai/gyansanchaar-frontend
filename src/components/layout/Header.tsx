@@ -3,13 +3,12 @@ import { GraduationCap, Bell, Search } from 'lucide-react'
 import { cookies } from 'next/headers'
 
 const navLinks = [
-  { href: '/colleges',    label: 'Colleges' },
-  { href: '/courses',     label: 'Courses' },
-  { href: '/exams',       label: 'Exams' },
-  { href: '/articles',    label: 'Articles' },
+  { href: '/colleges',  label: 'Colleges' },
+  { href: '/courses',   label: 'Courses'  },
+  { href: '/exams',     label: 'Exams'    },
+  { href: '/articles',  label: 'News'     },
 ]
 
-// Server component — reads cookie directly, no prop needed
 export default async function Header() {
   let isLoggedIn = false
   try {
@@ -41,7 +40,6 @@ export default async function Header() {
 
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-2 shrink-0">
-          {/* Search icon */}
           <Link href="/search"
             className="w-9 h-9 flex items-center justify-center rounded-lg text-body hover:text-primary hover:bg-primary-light transition-all"
             aria-label="Search">
@@ -61,19 +59,14 @@ export default async function Header() {
               </Link>
             </>
           ) : (
-            <>
-              <Link href="/login" className="text-sm font-medium text-body hover:text-primary px-3 py-2">
-                Sign In
-              </Link>
-              <Link href="/register"
-                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm">
-                Apply Free →
-              </Link>
-            </>
+            <Link href="/register"
+              className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors">
+              Apply Free →
+            </Link>
           )}
         </div>
 
-        {/* Mobile actions */}
+        {/* Mobile actions — Search icon + single CTA only */}
         <div className="md:hidden flex items-center gap-2">
           <Link href="/search"
             className="w-8 h-8 flex items-center justify-center rounded-lg text-body hover:text-primary"
@@ -86,18 +79,13 @@ export default async function Header() {
               Dashboard
             </Link>
           ) : (
-            <>
-              <Link href="/login"
-                className="border border-border text-xs font-medium text-body px-3 py-1.5 rounded-lg">
-                Sign In
-              </Link>
-              <Link href="/register"
-                className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold">
-                Apply Free
-              </Link>
-            </>
+            <Link href="/register"
+              className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap">
+              Apply Free
+            </Link>
           )}
         </div>
+
       </div>
     </header>
   )

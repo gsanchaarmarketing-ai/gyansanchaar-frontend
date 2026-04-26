@@ -46,7 +46,7 @@ export default async function ArticlesPage({ searchParams }: { searchParams: Rec
           <div className="max-w-container mx-auto px-6 text-center">
             <div className="text-xs font-bold text-white/50 uppercase tracking-widest mb-3">Knowledge Hub</div>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-3">
-              News &amp; Articles
+              News &amp; Guides
             </h1>
             <p className="text-white/70 text-lg max-w-lg mx-auto">
               Admission alerts, exam guides, career tips and college news — curated for Indian students.

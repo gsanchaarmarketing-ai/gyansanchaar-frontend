@@ -10,7 +10,7 @@ const navLinks = [
   { href: '/colleges', label: 'Colleges' },
   { href: '/courses',  label: 'Courses' },
   { href: '/exams',    label: 'Exams' },
-  { href: '/articles', label: 'Articles' },
+  { href: '/articles', label: 'News'     },
 ]
 
 export default function HeaderClient() {
@@ -53,10 +53,7 @@ export default function HeaderClient() {
               <Link href="/dashboard" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold">Dashboard</Link>
             </>
           ) : (
-            <>
-              <Link href="/login" className="text-sm font-medium text-body hover:text-primary px-3 py-2">Sign In</Link>
-              <Link href="/register" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm">Apply Free →</Link>
-            </>
+            <Link href="/register" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors hover:bg-primary-hover">Apply Free →</Link>
           )}
         </div>
         <div className="md:hidden flex items-center gap-2">
@@ -68,10 +65,7 @@ export default function HeaderClient() {
           {isLoggedIn ? (
             <Link href="/dashboard" className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Dashboard</Link>
           ) : (
-            <>
-              <Link href="/login" className="border border-border text-xs font-medium text-body px-3 py-1.5 rounded-lg">Sign In</Link>
-              <Link href="/register" className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Apply Free</Link>
-            </>
+            <Link href="/register" className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap">Apply Free</Link>
           )}
         </div>
       </div>
