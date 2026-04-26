@@ -15,7 +15,7 @@ export function websiteSchema() {
     description: 'Find colleges and courses across India. Apply directly — no agents, no fees.',
     potentialAction: {
       '@type': 'SearchAction',
-      target: { '@type': 'EntryPoint', urlTemplate: `${BASE}/colleges?q={search_term_string}` },
+      target: { '@type': 'EntryPoint', urlTemplate: `${BASE}/search?q={search_term_string}` },
       'query-input': 'required name=search_term_string',
     },
   }

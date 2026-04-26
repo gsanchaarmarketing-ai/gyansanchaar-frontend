@@ -9,9 +9,9 @@ import {
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import { breadcrumbSchema, organizationSchema } from '@/lib/seo'
+import { publicApi } from '@/lib/api'
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
-const API  = process.env.NEXT_PUBLIC_API_URL  ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
 
 export const revalidate = 300
 
@@ -72,11 +72,9 @@ const MOCK_TEAM = [
 
 async function getTeam() {
   try {
-    const res = await fetch(`${API}/public/team`, { next: { revalidate: 300 } })
-    if (!res.ok) return MOCK_TEAM
-    const data = (await res.json()).data ?? []
-    // If API returns placeholder names fall back to mock
-    if (!data.length || data[0]?.name?.startsWith('Founder')) return MOCK_TEAM
+    const res  = await publicApi.team()
+    const data = res.data ?? []
+    if (!data.length) return MOCK_TEAM
     return data
   } catch { return MOCK_TEAM }
 }

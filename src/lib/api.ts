@@ -100,6 +100,9 @@ export const publicApi = {
   counsellor: (slug: string) =>
     request<{ data: Counsellor }>(`/public/counsellors/${slug}`, { next: { revalidate: 300 } }),
 
+  team: () =>
+    request<{ data: TeamMember[] }>('/public/team', { next: { revalidate: 300 } }),
+
   grievanceOfficer: () => request<GrievanceOfficer>('/public/grievance-officer', { next: { revalidate: 86400 } }),
 
   grievanceStatus: (ticket: string) =>
@@ -371,6 +374,19 @@ export interface Document {
 export interface Paginated<T> {
   data: T[]
   meta: { current_page: number; last_page: number; per_page: number; total: number }
+}
+
+export interface TeamMember {
+  id: number
+  role_type: 'founder' | 'mentor' | 'team'
+  name: string
+  title: string
+  photo_url: string | null
+  bio: string
+  linkedin_url: string | null
+  twitter_url: string | null
+  email: string | null
+  sort_order: number
 }
 
 export type CollegesResponse = Paginated<College>

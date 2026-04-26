@@ -9,7 +9,11 @@ const nextConfig = {
     remotePatterns: [
       { protocol: 'https', hostname: 'gyansanchaar.cloud' },
       { protocol: 'https', hostname: '*.gyansanchaar.cloud' },
+      { protocol: 'https', hostname: '*.laravel.cloud' },
       { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: 'gyansanchaar-backend-main-q8sodv.free.laravel.cloud' },
+      { protocol: 'https', hostname: '*.amazonaws.com' },
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
     ],
   },
   async headers() {

@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getToken } from '@/lib/auth'
-import { studentApi } from '@/lib/api'
+import { studentApi, publicApi } from '@/lib/api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import ApplicationWizard from '@/components/dashboard/ApplicationWizard'
@@ -14,11 +14,11 @@ export default async function ApplicationFormPage() {
   catch { redirect('/login') }
 
   const [statesRes, coursesRes] = await Promise.allSettled([
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/states`).then(r => r.json()),
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/courses?per_page=50`).then(r => r.json()),
+    publicApi.states(),
+    publicApi.courses({ per_page: '50' }),
   ])
 
-  const states = statesRes.status === 'fulfilled' ? statesRes.value.data : []
+  const states  = statesRes.status  === 'fulfilled' ? statesRes.value.data  : []
   const courses = coursesRes.status === 'fulfilled' ? coursesRes.value.data : []
 
   return (

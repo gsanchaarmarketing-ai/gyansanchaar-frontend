@@ -8,8 +8,7 @@ import Link from 'next/link'
 import { Calendar, Clock, MessageCircle, X, RotateCw, CheckCircle2, ArrowLeft } from 'lucide-react'
 
 import { getClientToken } from '@/lib/client-auth'
-
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
+import { studentApi } from '@/lib/api'
 
 
 const TIME_SLOTS = [
@@ -40,10 +39,9 @@ export default function CounsellingPage() {
       if (!token) { router.push('/login'); return }
 
       Promise.all([
-        fetch(`${API}/student/applications`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' }),
-        fetch(`${API}/student/counselling`,  { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' }),
-      ]).then(async ([a, c]) => {
-        const appsData = await a.json()
+        studentApi.applications(token),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'}/student/counselling`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' }),
+      ]).then(async ([appsData, c]) => {
         const sessData = await c.json()
         setApplications((appsData.data ?? []).filter((a: any) => ['applied','approved','interview_scheduled'].includes(a.status)))
         setSessions(sessData.data ?? [])
@@ -59,7 +57,8 @@ export default function CounsellingPage() {
     setBooking(true)
     const token = await getClientToken()
     try {
-      const res = await fetch(`${API}/student/counselling`, {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
+      const res = await fetch(`${apiBase}/student/counselling`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
@@ -87,7 +86,8 @@ export default function CounsellingPage() {
   async function cancelSession(id: number) {
     if (!confirm('Cancel this counselling session?')) return
     const token = await getClientToken()
-    await fetch(`${API}/student/counselling/${id}/cancel`, {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
+    await fetch(`${apiBase}/student/counselling/${id}/cancel`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', Accept: 'application/json' },
       body: JSON.stringify({ reason: 'Cancelled by student' }),
