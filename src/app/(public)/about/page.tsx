@@ -43,12 +43,42 @@ const DIFF = [
   { icon: MapPin,     title: 'Built for North-East Students',          desc: 'Every feature designed around the challenges students from this region face.' },
 ]
 
+const MOCK_TEAM = [
+  {
+    id: 1, role_type: 'founder',
+    name: 'Ankur Bora', title: 'Co-Founder & CEO',
+    photo_url: null, linkedin_url: null, twitter_url: null,
+    bio: "Ankur grew up in Jorhat, Assam, and watched talented classmates lose out on college admissions simply because they lacked the right information and guidance. That experience became the seed of GyanSanchaar. He leads the company's vision, strategy, and college partnerships — building a platform he wished had existed when he was a student.",
+  },
+  {
+    id: 2, role_type: 'founder',
+    name: 'Priyanka Hazarika', title: 'Co-Founder & COO',
+    photo_url: null, linkedin_url: null, twitter_url: null,
+    bio: "Priyanka spent five years working in student admissions at a leading university in Guwahati, where she witnessed firsthand how misinformation and agent-driven advice hurt students' futures. She co-founded GyanSanchaar to fix the process from the inside — building systems that are transparent, fair, and student-first.",
+  },
+  {
+    id: 3, role_type: 'founder',
+    name: 'Rohan Dey', title: 'Co-Founder & CTO',
+    photo_url: null, linkedin_url: null, twitter_url: null,
+    bio: "Rohan is a software engineer from Silchar who built his first education tool while still in college. At GyanSanchaar, he leads all technology and product development — designing the tools that help students search, compare, and apply to colleges without confusion or cost.",
+  },
+  {
+    id: 4, role_type: 'mentor',
+    name: 'Kumar Sanjay Krishna', title: 'Mentor & Strategic Advisor · Ex Chief Secretary, Assam (IAS Retd.)',
+    photo_url: null, linkedin_url: null, twitter_url: null,
+    bio: "A distinguished IAS officer and former Chief Secretary of Assam — one of the highest administrative positions in state governance. With decades of public service and deep understanding of institutional governance, his mentorship ensures GyanSanchaar operates with rigour, ethics, and a long-term vision that a student-facing platform demands. His guidance shapes our commitment to ethical practices, full transparency, and a student-first approach in everything we build.",
+  },
+]
+
 async function getTeam() {
   try {
     const res = await fetch(`${API}/public/team`, { next: { revalidate: 300 } })
-    if (!res.ok) return []
-    return (await res.json()).data ?? []
-  } catch { return [] }
+    if (!res.ok) return MOCK_TEAM
+    const data = (await res.json()).data ?? []
+    // If API returns placeholder names fall back to mock
+    if (!data.length || data[0]?.name?.startsWith('Founder')) return MOCK_TEAM
+    return data
+  } catch { return MOCK_TEAM }
 }
 
 export default async function AboutPage() {
