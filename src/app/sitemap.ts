@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const colleges = await publicApi.colleges({ per_page: '500' })
     colleges.data.forEach(c => dynamic.push({
       url: `${BASE}/colleges/${c.slug}`,
-      lastModified: c.updated_at ? new Date(c.updated_at) : now,
+      lastModified: (c as any).updated_at ? new Date((c as any).updated_at) : now,
       changeFrequency: 'weekly',
       priority: 0.85,
     }))
@@ -50,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const articles = await publicApi.articles({ per_page: '500' })
     articles.data.forEach(a => dynamic.push({
       url: `${BASE}/articles/${a.slug}`,
-      lastModified: a.updated_at ? new Date(a.updated_at) : now,
+      lastModified: (a as any).updated_at ? new Date((a as any).updated_at) : now,
       changeFrequency: 'monthly',
       priority: 0.7,
     }))
