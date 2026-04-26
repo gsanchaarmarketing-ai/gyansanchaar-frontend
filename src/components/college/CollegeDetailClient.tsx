@@ -189,7 +189,7 @@ function CourseApplyButton({ college, course }: { college: any; course: any }) {
   )
 }
 
-export default function CollegeDetailClient({ college }: { college: any }) {
+export default function CollegeDetailClient({ college, content = {} }: { college: any; content?: Record<string, string> }) {
   const [activeTab, setActiveTab] = useState<Tab>('Overview')
   const courses = college.courses ?? []
 
