@@ -8,7 +8,7 @@ import Link from 'next/link'
 import {
   ArrowRight, FileText, Building2, CheckCircle2,
   Clock, AlertCircle, Calendar, Download, MessageCircle,
-  ChevronRight, User, Shield, BookOpen, Sparkles
+  ChevronRight, User, Shield, BookOpen, Sparkles, Bell
 } from 'lucide-react'
 import { statusColor, statusLabel } from '@/lib/utils'
 
@@ -187,10 +187,11 @@ export default async function DashboardPage() {
           <h2 className="font-bold text-heading mb-3">Quick Links</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { href: '/dashboard/counselling', icon: MessageCircle, label: 'Counselling', sub: 'Book college sessions' },
-              { href: '/dashboard/application', icon: User, label: 'My Profile', sub: 'Edit details & documents' },
-              { href: '/dashboard/documents',   icon: FileText,  label: 'Documents',       sub: 'Marksheets & certificates' },
-              { href: '/dashboard/privacy',     icon: Shield,    label: 'Privacy',         sub: 'Data & consent settings' },
+              { href: '/dashboard/notifications', icon: Bell,          label: 'Notifications',  sub: 'Application updates' },
+              { href: '/dashboard/counselling',   icon: MessageCircle, label: 'Counselling',    sub: 'Book college sessions' },
+              { href: '/dashboard/application',   icon: User,          label: 'My Profile',     sub: 'Edit details & documents' },
+              { href: '/dashboard/documents',     icon: FileText,      label: 'Documents',      sub: 'Marksheets & certificates' },
+              { href: '/dashboard/privacy',       icon: Shield,        label: 'Privacy',        sub: 'Data & consent settings' },
             ].map(({ href, icon: Icon, label, sub }) => (
               <Link key={href} href={href}
                 className="bg-white border border-border rounded-2xl p-4 hover:border-primary transition-colors">

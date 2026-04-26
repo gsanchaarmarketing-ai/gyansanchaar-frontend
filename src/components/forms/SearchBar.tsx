@@ -4,13 +4,13 @@ import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { useState } from 'react'
 
-export default function SearchBar() {
+export default function SearchBar({ placeholder = 'Search colleges, courses, cities…' }: { placeholder?: string }) {
   const router = useRouter()
   const [q, setQ] = useState('')
 
   function handle(e: React.FormEvent) {
     e.preventDefault()
-    if (q.trim()) router.push(`/colleges?q=${encodeURIComponent(q.trim())}`)
+    if (q.trim()) router.push(`/search?q=${encodeURIComponent(q.trim())}`)
   }
 
   return (
@@ -18,7 +18,7 @@ export default function SearchBar() {
       <input
         value={q}
         onChange={e => setQ(e.target.value)}
-        placeholder="Search colleges, courses, cities…"
+        placeholder={placeholder}
         className="flex-1 px-4 py-3 rounded-l-xl text-slate-900 text-sm outline-none border-0"
         aria-label="Search"
       />

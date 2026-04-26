@@ -89,7 +89,7 @@ export const publicApi = {
   streams: () => request<{ data: Stream[] }>('/public/streams', { next: { revalidate: 86400 } }),
 
   exams: (params?: Record<string, string>) =>
-    request<ExamsResponse>('/public/exams', { cache: 'no-store' }),
+    request<ExamsResponse>(`/public/exams?${new URLSearchParams(params)}`, { cache: 'no-store' }),
 
   exam: (slug: string) =>
     request<{ data: Exam }>(`/public/exams/${slug}`, { next: { revalidate: 300 } }),
@@ -356,6 +356,7 @@ export interface Application {
   admission_letter_path: string | null
   admission_letter_url: string | null
   created_at: string
+  updated_at: string
 }
 
 export interface Document {

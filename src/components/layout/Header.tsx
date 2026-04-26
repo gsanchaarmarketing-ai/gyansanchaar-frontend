@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { GraduationCap } from 'lucide-react'
+import { GraduationCap, Bell, Search } from 'lucide-react'
 import { cookies } from 'next/headers'
 
 const navLinks = [
@@ -40,12 +40,26 @@ export default async function Header() {
         </nav>
 
         {/* Desktop actions */}
-        <div className="hidden md:flex items-center gap-3 shrink-0">
+        <div className="hidden md:flex items-center gap-2 shrink-0">
+          {/* Search icon */}
+          <Link href="/search"
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-body hover:text-primary hover:bg-primary-light transition-all"
+            aria-label="Search">
+            <Search className="w-4 h-4" />
+          </Link>
+
           {isLoggedIn ? (
-            <Link href="/dashboard"
-              className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-              Dashboard
-            </Link>
+            <>
+              <Link href="/dashboard/notifications"
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-body hover:text-primary hover:bg-primary-light transition-all"
+                aria-label="Notifications">
+                <Bell className="w-4 h-4" />
+              </Link>
+              <Link href="/dashboard"
+                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
+                Dashboard
+              </Link>
+            </>
           ) : (
             <>
               <Link href="/login" className="text-sm font-medium text-body hover:text-primary px-3 py-2">
@@ -59,8 +73,13 @@ export default async function Header() {
           )}
         </div>
 
-        {/* Mobile actions — no hamburger, bottom nav handles navigation */}
+        {/* Mobile actions */}
         <div className="md:hidden flex items-center gap-2">
+          <Link href="/search"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-body hover:text-primary"
+            aria-label="Search">
+            <Search className="w-4 h-4" />
+          </Link>
           {isLoggedIn ? (
             <Link href="/dashboard"
               className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold">

@@ -38,9 +38,9 @@ const VALUES = [
 const DIFF = [
   { icon: BookOpen,   title: 'Single Profile, Multiple Applications', desc: 'Build your profile once and apply to any number of verified colleges.' },
   { icon: BadgeCheck, title: 'Verified Colleges Only',                desc: 'Cross-checked against UGC, AICTE, MCI, and NIRF before listing.' },
-  { icon: Target,     title: 'Seat Predictor Tool',                   desc: 'Shortlist colleges where you have a realistic chance, based on your marks.' },
   { icon: Users,      title: 'Direct Counsellor Access',              desc: 'The college\'s own admissions officer contacts you — no middlemen.' },
   { icon: MapPin,     title: 'Built for North-East Students',          desc: 'Every feature designed around the challenges students from this region face.' },
+  { icon: Target,     title: 'DPDP Act 2023 Compliant',               desc: 'Your data stays yours. No profiling, no selling. Compliant with Indian law.' },
 ]
 
 const MOCK_TEAM = [

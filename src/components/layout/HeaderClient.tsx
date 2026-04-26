@@ -3,7 +3,7 @@
 // Reads auth state via cookie on client side
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { GraduationCap } from 'lucide-react'
+import { GraduationCap, Bell, Search } from 'lucide-react'
 import { getClientToken } from '@/lib/client-auth'
 
 const navLinks = [
@@ -37,9 +37,21 @@ export default function HeaderClient() {
             </Link>
           ))}
         </nav>
-        <div className="hidden md:flex items-center gap-3 shrink-0">
+        <div className="hidden md:flex items-center gap-2 shrink-0">
+          <Link href="/search"
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-body hover:text-primary hover:bg-primary-light transition-all"
+            aria-label="Search">
+            <Search className="w-4 h-4" />
+          </Link>
           {isLoggedIn ? (
-            <Link href="/dashboard" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold">Dashboard</Link>
+            <>
+              <Link href="/dashboard/notifications"
+                className="w-9 h-9 flex items-center justify-center rounded-lg text-body hover:text-primary hover:bg-primary-light transition-all"
+                aria-label="Notifications">
+                <Bell className="w-4 h-4" />
+              </Link>
+              <Link href="/dashboard" className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold">Dashboard</Link>
+            </>
           ) : (
             <>
               <Link href="/login" className="text-sm font-medium text-body hover:text-primary px-3 py-2">Sign In</Link>
@@ -48,6 +60,11 @@ export default function HeaderClient() {
           )}
         </div>
         <div className="md:hidden flex items-center gap-2">
+          <Link href="/search"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-body hover:text-primary"
+            aria-label="Search">
+            <Search className="w-4 h-4" />
+          </Link>
           {isLoggedIn ? (
             <Link href="/dashboard" className="bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold">Dashboard</Link>
           ) : (

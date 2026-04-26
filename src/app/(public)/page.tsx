@@ -89,7 +89,7 @@ export default async function HomePage() {
   const isLoggedIn = !!token
   const [articlesRes, collegesRes] = await Promise.allSettled([
     publicApi.articles({ per_page: '4' }),
-    publicApi.colleges({ per_page: '6', sort: 'nirf' }),
+    publicApi.colleges({ per_page: '6', featured: 'true', sort: 'nirf' }),
   ])
 
   const articles = articlesRes.status === 'fulfilled' ? articlesRes.value.data : []
