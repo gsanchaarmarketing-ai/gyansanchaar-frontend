@@ -197,6 +197,13 @@ export const studentApi = {
   downloadLetter: (token: string, id: number) =>
     request<{ url?: string; message?: string }>(`/student/applications/${id}/letter`, { token }),
 
+  scheduleInterview: (token: string, id: number, interview_at: string) =>
+    request<{ message: string; data: Application }>(`/student/applications/${id}/interview`, {
+      method: 'POST',
+      token,
+      body: JSON.stringify({ interview_at }),
+    }),
+
   documents: (token: string) =>
     request<{ data: Document[] }>('/student/documents', { token }),
 

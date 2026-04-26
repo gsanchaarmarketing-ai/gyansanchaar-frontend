@@ -11,7 +11,6 @@ import { getClientToken } from '@/lib/client-auth'
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
 
-function getToken() { return getClientToken() }
 
 const TIME_SLOTS = [
   '09:00','09:30','10:00','10:30','11:00','11:30',
