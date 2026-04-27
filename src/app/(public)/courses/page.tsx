@@ -153,13 +153,13 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
                           </span>
                         </div>
 
-                        {/* Stats row */}
-                        <div className="flex flex-wrap gap-3 mt-3">
-                          <div className="bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs">
+                        {/* Stats row — side by side */}
+                        <div className="flex gap-2 mt-3">
+                          <div className="bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs flex-1">
                             <div className="text-muted">Average Duration</div>
                             <div className="font-bold text-heading mt-0.5">{durationYrs} {durationYrs === 1 ? 'year' : 'years'}</div>
                           </div>
-                          <div className="bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs">
+                          <div className="bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs flex-1">
                             <div className="text-muted">Average Fees</div>
                             <div className="font-bold text-heading mt-0.5">{feeRange(c)}</div>
                           </div>
