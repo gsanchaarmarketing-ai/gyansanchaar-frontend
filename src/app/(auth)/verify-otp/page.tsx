@@ -11,7 +11,9 @@ export default function VerifyOtpPage() {
   const phone     = sp.get('phone')   ?? ''
   const email     = sp.get('email')   ?? ''
   const purpose   = sp.get('purpose') ?? 'registration'
-  const initialCh = (sp.get('channel') ?? 'whatsapp') as 'whatsapp' | 'email' | 'sms'
+  // Registration always uses email; phone_verification always uses phone
+  const defaultCh = purpose === 'registration' ? 'email' : (sp.get('channel') ?? 'whatsapp')
+  const initialCh = (sp.get('channel') ?? defaultCh) as 'whatsapp' | 'email' | 'sms'
 
   const [channel,   setChannel]   = useState<'whatsapp' | 'email' | 'sms'>(initialCh)
   const [code,      setCode]      = useState(['','','','','',''])
@@ -152,8 +154,9 @@ export default function VerifyOtpPage() {
                 : `Resend OTP via ${isEmail ? 'Email' : 'WhatsApp'}`}
             </button>
 
-            {/* Always offer the other channel as fallback */}
-            {!isEmail && email && (
+            {/* Channel switch — only for non-registration flows.
+                Registration is email-only; phone is verified later in dashboard. */}
+            {purpose !== 'registration' && !isEmail && email && (
               <button
                 onClick={() => resend('email')}
                 disabled={resending}
@@ -163,7 +166,7 @@ export default function VerifyOtpPage() {
                 Send OTP to email instead
               </button>
             )}
-            {isEmail && phone && (
+            {purpose !== 'registration' && isEmail && phone && (
               <button
                 onClick={() => resend('whatsapp')}
                 disabled={resending}

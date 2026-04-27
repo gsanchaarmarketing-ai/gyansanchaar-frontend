@@ -49,22 +49,18 @@ export default function RegisterPage() {
         policy_version: '1.0',
       })
 
-      // Backend may report a fallback channel — pass it on so OTP page shows correct text
-      const channel = res?.channel ?? 'whatsapp'
+      // Registration uses EMAIL OTP only (more reliable than WhatsApp).
+      // Phone gets verified later inside dashboard profile.
       const userId  = res?.user_id ?? res?.user?.id ?? ''
       const email   = encodeURIComponent(values.email)
+      const phone   = encodeURIComponent(values.phone)
 
-      toast.success(
-        channel === 'email'
-          ? 'OTP sent to your email (WhatsApp unavailable).'
-          : 'OTP sent to your WhatsApp.',
-        { duration: 4000 },
-      )
+      toast.success('Account created! OTP sent to your email.', { duration: 4000 })
 
       // Hard navigation guarantees the verify-otp page loads fresh state
       window.location.href =
-        `/verify-otp?phone=${encodeURIComponent(values.phone)}` +
-        `&email=${email}&purpose=registration&user_id=${userId}&channel=${channel}`
+        `/verify-otp?email=${email}&phone=${phone}` +
+        `&purpose=registration&user_id=${userId}&channel=email`
     } catch (e: any) {
       // Surface validation errors from backend clearly
       const msg = e?.data?.errors
