@@ -97,24 +97,23 @@ export default function VerifyOtpPage() {
   const isEmail = channel === 'email'
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-6">
-          <div className="text-brand-600 text-3xl mb-3">
-            {isEmail ? '📧' : '💬'}
-          </div>
-          <h1 className="text-xl font-bold">
-            {isEmail ? 'Check your email' : 'Check your WhatsApp'}
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">
-            We sent a 6-digit code to{' '}
-            {isEmail
-              ? <strong className="break-all">{email}</strong>
-              : <strong>+91 {phone}</strong>}
-          </p>
+    <div className="w-full max-w-md mx-auto md:mx-0 md:ml-auto">
+      <div className="text-center md:text-left mb-5">
+        <div className="inline-block text-3xl mb-2">
+          {isEmail ? '📧' : '💬'}
         </div>
+        <h1 className="text-2xl font-bold text-white">
+          {isEmail ? 'Check your email' : 'Check your WhatsApp'}
+        </h1>
+        <p className="text-white/60 text-sm mt-1">
+          We sent a 6-digit code to{' '}
+          {isEmail
+            ? <strong className="break-all text-white">{email}</strong>
+            : <strong className="text-white">+91 {phone}</strong>}
+        </p>
+      </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border p-6">
+      <div className="bg-white rounded-2xl shadow-2xl p-6">
           <div className="flex gap-2 justify-center mb-5">
             {code.map((c, i) => (
               <input
@@ -181,12 +180,11 @@ export default function VerifyOtpPage() {
               Verifying…
             </div>
           )}
-        </div>
-
-        <p className="text-center text-xs text-slate-400 mt-5">
-          Didn't receive the code? Check spam folder. WhatsApp messages may take up to 30 seconds.
-        </p>
       </div>
+
+      <p className="text-center text-xs text-white/40 mt-5">
+        Didn't receive the code? Check spam folder. WhatsApp messages may take up to 30 seconds.
+      </p>
     </div>
   )
 }

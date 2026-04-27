@@ -54,17 +54,17 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-brand-600 text-xl font-bold">
-            <GraduationCap className="w-7 h-7" />GyanSanchaar
-          </Link>
-          <p className="text-slate-500 text-sm mt-2">Log in to your account</p>
-        </div>
+    <div className="w-full max-w-md mx-auto md:mx-0 md:ml-auto">
+      <div className="text-center md:text-left mb-5">
+        <Link href="/" className="md:hidden inline-flex items-center gap-2 text-white text-xl font-bold mb-3">
+          <GraduationCap className="w-6 h-6" />GyanSanchaar
+        </Link>
+        <h1 className="text-2xl font-bold text-white">Welcome back</h1>
+        <p className="text-white/60 text-sm mt-1">Log in to track applications and check status</p>
+      </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1.5">Email</label>
               <input type="email" {...register('email')}
@@ -95,7 +95,6 @@ export default function LoginPage() {
             Don't have an account?{' '}
             <Link href="/register" className="text-brand-600 font-medium">Sign up</Link>
           </p>
-        </div>
       </div>
     </div>
   )

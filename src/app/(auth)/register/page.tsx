@@ -76,17 +76,17 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-6">
-          <Link href="/" className="inline-flex items-center gap-2 text-brand-600 text-xl font-bold">
-            <GraduationCap className="w-7 h-7" />GyanSanchaar
-          </Link>
-          <p className="text-slate-500 text-sm mt-1">Create your free account</p>
-        </div>
+    <div className="w-full max-w-md mx-auto md:mx-0 md:ml-auto">
+      <div className="text-center md:text-left mb-5">
+        <Link href="/" className="md:hidden inline-flex items-center gap-2 text-white text-xl font-bold mb-3">
+          <GraduationCap className="w-6 h-6" />GyanSanchaar
+        </Link>
+        <h1 className="text-2xl font-bold text-white">Create your free account</h1>
+        <p className="text-white/60 text-sm mt-1">Apply to colleges in 10 minutes. Always free.</p>
+      </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {([['name','Full Name','text'],['email','Email','email'],['phone','Phone (10 digits)','tel'],['password','Password','password'],['password_confirmation','Confirm Password','password'],['dob','Date of Birth (optional)','date']] as const).map(([n,l,t]) => (
               <div key={n}>
                 <label className="block text-sm font-medium mb-1">{l}</label>
@@ -127,7 +127,6 @@ export default function RegisterPage() {
           <p className="text-center text-sm text-slate-500 mt-4">
             Have an account? <Link href="/login" className="text-brand-600 font-medium">Log in</Link>
           </p>
-        </div>
       </div>
     </div>
   )
