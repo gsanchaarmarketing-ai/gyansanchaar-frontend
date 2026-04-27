@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -28,14 +27,13 @@ const schema = z.object({
 type Form = z.infer<typeof schema>
 
 export default function RegisterPage() {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm<Form>({ resolver: zodResolver(schema) })
 
   async function onSubmit(values: Form) {
     setLoading(true)
     try {
-      const res = await studentApi.register({
+      const res: any = await studentApi.register({
         name: values.name,
         email: values.email,
         phone: values.phone,
@@ -50,11 +48,31 @@ export default function RegisterPage() {
         },
         policy_version: '1.0',
       })
-      toast.success('Registered! Verify your phone now.')
-      router.push(`/verify-otp?phone=${encodeURIComponent(values.phone)}&purpose=registration&user_id=${res.user?.id}`)
+
+      // Backend may report a fallback channel — pass it on so OTP page shows correct text
+      const channel = res?.channel ?? 'whatsapp'
+      const userId  = res?.user_id ?? res?.user?.id ?? ''
+      const email   = encodeURIComponent(values.email)
+
+      toast.success(
+        channel === 'email'
+          ? 'OTP sent to your email (WhatsApp unavailable).'
+          : 'OTP sent to your WhatsApp.',
+        { duration: 4000 },
+      )
+
+      // Hard navigation guarantees the verify-otp page loads fresh state
+      window.location.href =
+        `/verify-otp?phone=${encodeURIComponent(values.phone)}` +
+        `&email=${email}&purpose=registration&user_id=${userId}&channel=${channel}`
     } catch (e: any) {
-      toast.error(e.message ?? 'Registration failed')
-    } finally { setLoading(false) }
+      // Surface validation errors from backend clearly
+      const msg = e?.data?.errors
+        ? Object.values(e.data.errors).flat().join(' · ')
+        : (e?.message ?? 'Registration failed')
+      toast.error(msg)
+      setLoading(false)
+    }
   }
 
   return (

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -17,7 +17,9 @@ const schema = z.object({
 type Form = z.infer<typeof schema>
 
 export default function LoginPage() {
-  const router = useRouter()
+  const sp = useSearchParams()
+  const redirectTo = sp.get('redirect') ?? '/dashboard'
+
   const [showPwd, setShowPwd] = useState(false)
   const [loading, setLoading] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm<Form>({ resolver: zodResolver(schema) })
@@ -25,17 +27,30 @@ export default function LoginPage() {
   async function onSubmit(values: Form) {
     setLoading(true)
     try {
-      const res = await studentApi.login(values)
-      await fetch('/api/auth/set-token', {
+      const res: any = await studentApi.login(values)
+
+      // Set cookie via Next.js API route, then verify it succeeded
+      const setRes = await fetch('/api/auth/set-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: res.token }),
       })
+      if (!setRes.ok) throw new Error('Failed to set login session.')
+
       toast.success('Logged in!')
-      router.push(res.requires_otp ? `/verify-otp?phone=${encodeURIComponent(res.user.phone ?? '')}` : '/dashboard')
+
+      // Hard navigation — guarantees the new cookie is sent on the next request
+      // and the dashboard page renders fresh server-side. router.push() uses
+      // Next.js cache and may render the pre-login version.
+      const target = res.requires_otp
+        ? `/verify-otp?phone=${encodeURIComponent(res.user?.phone ?? '')}&purpose=login&channel=whatsapp`
+        : redirectTo
+      window.location.href = target
     } catch (e: any) {
-      toast.error(e.message ?? 'Login failed')
-    } finally { setLoading(false) }
+      const msg = e?.data?.message ?? e?.message ?? 'Login failed'
+      toast.error(msg)
+      setLoading(false)
+    }
   }
 
   return (
@@ -78,7 +93,7 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-slate-500 mt-5">
             Don't have an account?{' '}
-            <Link href="/register" className="text-brand-600 font-medium">Register</Link>
+            <Link href="/register" className="text-brand-600 font-medium">Sign up</Link>
           </p>
         </div>
       </div>
