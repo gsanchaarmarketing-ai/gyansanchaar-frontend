@@ -170,7 +170,7 @@ export default function CollegeDetailClient({ college, content = {} }: { college
 
           {activeTab === 'Overview' && (
             <div className="space-y-8">
-              {college.about && (<section><h2 className="text-lg font-bold text-heading mb-3">About {college.name}</h2><p className="text-body text-sm leading-relaxed">{college.about}</p></section>)}
+              {college.about && (<section><h2 className="text-lg font-bold text-heading mb-3">About {college.name}</h2>{college.about.trim().startsWith('<') ? (<div className="prose prose-sm max-w-none text-body leading-relaxed prose-headings:text-heading prose-a:text-primary prose-a:underline prose-ul:list-disc prose-ol:list-decimal" dangerouslySetInnerHTML={{ __html: college.about }} />) : (<p className="text-body text-sm leading-relaxed">{college.about}</p>)}</section>)}
               <section>
                 <h2 className="text-lg font-bold text-heading mb-4">Quick Facts</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -295,7 +295,11 @@ export default function CollegeDetailClient({ college, content = {} }: { college
               {college.fee_notes && (
                 <div className="bg-primary-light border border-primary/20 rounded-xl p-4">
                   <div className="text-xs font-bold text-primary uppercase tracking-wider mb-1.5">Additional Fee Information</div>
-                  <p className="text-sm text-body leading-relaxed">{college.fee_notes}</p>
+                  {college.fee_notes.trim().startsWith('<') ? (
+                    <div className="prose prose-sm max-w-none text-body prose-a:text-primary prose-ul:list-disc" dangerouslySetInnerHTML={{ __html: college.fee_notes }} />
+                  ) : (
+                    <p className="text-sm text-body leading-relaxed">{college.fee_notes}</p>
+                  )}
                 </div>
               )}
 

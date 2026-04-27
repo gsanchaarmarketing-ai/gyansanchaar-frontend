@@ -37,6 +37,21 @@ function feeRange(course: any): string {
 }
 
 function TextContent({ text }: { text: string }) {
+  // If content is HTML (from Quill editor), render it directly
+  if (text.trim().startsWith('<')) {
+    return (
+      <div
+        className="prose prose-sm max-w-none text-body leading-relaxed
+          prose-headings:text-heading prose-headings:font-bold
+          prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
+          prose-a:text-primary prose-a:underline
+          prose-ul:list-disc prose-ol:list-decimal
+          prose-li:text-body prose-strong:text-heading"
+        dangerouslySetInnerHTML={{ __html: text }}
+      />
+    )
+  }
+  // Plain text fallback with bullet detection
   const paragraphs = text.split(/\n{2,}/).filter(Boolean)
   return (
     <div className="space-y-4 text-body text-sm leading-relaxed">
