@@ -306,9 +306,18 @@ export interface Course {
   level: string
   duration_months: number
   stream: Stream | null
-  default_fee: number
+  default_fee: number | null
+  fee_min: number | null
+  fee_max: number | null
   description: string | null
   eligibility: string | null
+  overview_image: string | null
+  overview_content: string | null
+  syllabus: string | null
+  scope_jobs: string | null
+  avg_salary: string | null
+  top_colleges_text: string | null
+  is_active: boolean
   colleges?: College[]
 }
 
