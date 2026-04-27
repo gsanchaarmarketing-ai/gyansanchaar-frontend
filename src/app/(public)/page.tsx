@@ -7,6 +7,7 @@ import {
   Zap, Clock, BadgeCheck
 } from 'lucide-react'
 import { publicApi } from '@/lib/api'
+import MediaMarquee from '@/components/media/MediaMarquee'
 import { getToken } from '@/lib/auth'
 import { getCmsContent, c } from '@/lib/cms'
 import { breadcrumbSchema, howItWorksSchema, faqSchema } from '@/lib/seo'
@@ -29,11 +30,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic'
 
 /* ─── Design-system constants ─────────────────────────────────────── */
-
-const TRUST_LOGOS = [
-  'IIT Delhi', 'IIM Ahmedabad', 'AIIMS', 'NIT Trichy',
-  'BITS Pilani', 'VIT Vellore', 'Manipal', 'SRM',
-]
 
 const STATS = [
   { num: '₹0',    label: 'Application Fees' },
@@ -87,13 +83,15 @@ const STREAMS = [
 export default async function HomePage() {
   const token = await getToken().catch(() => null)
   const isLoggedIn = !!token
-  const [articlesRes, collegesRes] = await Promise.allSettled([
+  const [articlesRes, collegesRes, mediaLogosRes] = await Promise.allSettled([
     publicApi.articles({ per_page: '4' }),
     publicApi.colleges({ per_page: '6', featured: 'true', sort: 'nirf' }),
+    publicApi.mediaLogos(),
   ])
 
-  const articles = articlesRes.status === 'fulfilled' ? articlesRes.value.data : []
-  const colleges = collegesRes.status === 'fulfilled' ? collegesRes.value.data : []
+  const articles   = articlesRes.status   === 'fulfilled' ? articlesRes.value.data   : []
+  const colleges   = collegesRes.status   === 'fulfilled' ? collegesRes.value.data   : []
+  const mediaLogos = mediaLogosRes.status === 'fulfilled' ? mediaLogosRes.value.data : []
 
   const faqs = [
     { q: 'Is GyanSanchaar free for students?', a: 'Yes. GyanSanchaar is completely free for students. We charge colleges, not students.' },
@@ -222,20 +220,17 @@ export default async function HomePage() {
                 </div>
               ))}
             </div>
-            {/* Logo strip */}
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-px flex-1 bg-border" />
-              <span className="text-xs text-muted font-medium px-3">Trusted by students applying to</span>
-              <div className="h-px flex-1 bg-border" />
-            </div>
-            <div className="flex flex-wrap justify-center gap-3">
-              {TRUST_LOGOS.map(logo => (
-                <span key={logo}
-                  className="px-4 py-1.5 border border-border rounded-full text-xs font-medium text-body hover:border-primary hover:text-primary transition-colors cursor-default">
-                  {logo}
-                </span>
-              ))}
-            </div>
+            {/* Media coverage marquee */}
+            {mediaLogos.length > 0 && (
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-px flex-1 bg-border" />
+                  <span className="text-xs text-muted font-medium px-3">As seen in</span>
+                  <div className="h-px flex-1 bg-border" />
+                </div>
+                <MediaMarquee logos={mediaLogos} />
+              </div>
+            )}
           </div>
         </section>
 

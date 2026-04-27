@@ -103,6 +103,12 @@ export const publicApi = {
   team: () =>
     request<{ data: TeamMember[] }>('/public/team', { next: { revalidate: 300 } }),
 
+  mediaLogos: () =>
+    request<{ data: { id: number; name: string; logo_url: string; website_url: string | null }[] }>(
+      '/public/media-logos',
+      { next: { revalidate: 300 } }
+    ),
+
   grievanceOfficer: () => request<GrievanceOfficer>('/public/grievance-officer', { next: { revalidate: 86400 } }),
 
   grievanceStatus: (ticket: string) =>
