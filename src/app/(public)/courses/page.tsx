@@ -128,56 +128,48 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
 
                 return (
                   <div key={c.id} className="bg-white border border-border rounded-2xl p-5 hover:border-primary hover:shadow-md transition-all">
-                    <div className="flex items-start gap-4">
-                      {/* Course image */}
-                      <div className="w-28 h-20 rounded-xl bg-primary-light border border-border flex-shrink-0 overflow-hidden flex items-center justify-center">
+                    {/* Top row: image + title */}
+                    <div className="flex items-start gap-4 mb-3">
+                      <div className="w-20 h-16 rounded-xl bg-primary-light border border-border flex-shrink-0 overflow-hidden flex items-center justify-center">
                         {c.overview_image ? (
-                          <img src={c.overview_image} alt={c.name}
-                               className="w-full h-full object-cover" />
+                          <img src={c.overview_image} alt={c.name} className="w-full h-full object-cover" />
                         ) : (
-                          <BookOpen className="w-8 h-8 text-primary/40" />
+                          <BookOpen className="w-7 h-7 text-primary/40" />
                         )}
                       </div>
-
-                      {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <h2 className="font-bold text-heading text-base leading-tight">{c.name}</h2>
-                            {c.stream && (
-                              <div className="text-xs text-muted mt-0.5">{c.stream.name}</div>
-                            )}
-                          </div>
+                        <div className="flex items-start justify-between gap-2">
+                          <h2 className="font-bold text-heading text-base leading-tight">{c.name}</h2>
                           <span className={`flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full ${colorClass}`}>
                             {LEVEL_LABELS[c.level] ?? c.level?.toUpperCase()}
                           </span>
                         </div>
-
-                        {/* Stats row — side by side */}
-                        <div className="flex gap-2 mt-3">
-                          <div className="bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs flex-1">
-                            <div className="text-muted">Average Duration</div>
-                            <div className="font-bold text-heading mt-0.5">{durationYrs} {durationYrs === 1 ? 'year' : 'years'}</div>
-                          </div>
-                          <div className="bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs flex-1">
-                            <div className="text-muted">Average Fees</div>
-                            <div className="font-bold text-heading mt-0.5">{feeRange(c)}</div>
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        {c.description && (
-                          <p className="text-body text-sm mt-3 line-clamp-2 leading-relaxed">{c.description}</p>
-                        )}
+                        {c.stream && <div className="text-xs text-muted mt-0.5">{c.stream.name}</div>}
                       </div>
                     </div>
 
-                    {/* View Details CTA */}
-                    <div className="mt-4 pt-4 border-t border-border">
+                    {/* Stats row — full width */}
+                    <div className="flex gap-2 mb-3">
+                      <div className="bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs flex-1">
+                        <div className="text-muted">Average Duration</div>
+                        <div className="font-bold text-heading mt-0.5">{durationYrs} {durationYrs === 1 ? 'year' : 'years'}</div>
+                      </div>
+                      <div className="bg-slate-50 border border-border rounded-lg px-3 py-1.5 text-xs flex-1">
+                        <div className="text-muted">Average Fees</div>
+                        <div className="font-bold text-heading mt-0.5">{feeRange(c)}</div>
+                      </div>
+                    </div>
+
+                    {/* Description — full width */}
+                    {c.description && (
+                      <p className="text-body text-sm line-clamp-2 leading-relaxed mb-4">{c.description}</p>
+                    )}
+
+                    {/* CTA */}
+                    <div className="border-t border-border pt-4">
                       <Link href={`/courses/${c.slug}`}
                         className="flex items-center justify-center gap-2 w-full border border-primary text-primary font-semibold text-sm py-2.5 rounded-xl hover:bg-primary-light transition-colors">
-                        View Details
-                        <ChevronRight className="w-4 h-4" />
+                        View Details <ChevronRight className="w-4 h-4" />
                       </Link>
                     </div>
                   </div>
