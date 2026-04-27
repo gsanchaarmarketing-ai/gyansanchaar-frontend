@@ -6,10 +6,9 @@ import { useRouter } from 'next/navigation'
 import { getClientToken } from '@/lib/client-auth'
 import { studentApi } from '@/lib/api'
 import {
-  MapPin, Award, Globe, Mail, BadgeCheck,
+  MapPin, Award, BadgeCheck,
   ChevronRight, MessageCircle, BookOpen, IndianRupee,
   TrendingUp, Home, ArrowLeft, Star, Users, Clock,
-  ExternalLink,
 } from 'lucide-react'
 import GalleryCarousel from './GalleryCarousel'
 
@@ -188,28 +187,6 @@ export default function CollegeDetailClient({ college, content = {} }: { college
                       <div className="text-sm font-semibold text-heading capitalize">{f.value}</div>
                     </div>
                   ))}
-                </div>
-              </section>
-              <section className="bg-white border border-border rounded-2xl p-5">
-                <h2 className="text-base font-bold text-heading mb-4">Official Contact</h2>
-                <div className="space-y-3">
-                  {college.website ? (
-                    <a href={college.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary hover:bg-primary-light transition-colors group">
-                      <Globe className="w-5 h-5 text-primary shrink-0" />
-                      <div className="flex-1 min-w-0"><div className="text-xs font-bold text-muted uppercase tracking-wider">Official Website</div><div className="text-sm text-primary truncate">{college.website}</div></div>
-                      <ExternalLink className="w-4 h-4 text-muted group-hover:text-primary" />
-                    </a>
-                  ) : (
-                    <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-slate-50"><Globe className="w-5 h-5 text-muted shrink-0" /><div><div className="text-xs font-bold text-muted uppercase tracking-wider">Official Website</div><div className="text-xs text-muted">Not listed</div></div></div>
-                  )}
-                  {college.contact_email ? (
-                    <a href={`mailto:${college.contact_email}`} className="flex items-center gap-3 p-3 rounded-xl border border-border hover:border-primary hover:bg-primary-light transition-colors">
-                      <Mail className="w-5 h-5 text-primary shrink-0" /><div><div className="text-xs font-bold text-muted uppercase tracking-wider">Admissions Email</div><div className="text-sm text-primary">{college.contact_email}</div></div>
-                    </a>
-                  ) : (
-                    <div className="flex items-center gap-3 p-3 rounded-xl border border-border bg-slate-50"><Mail className="w-5 h-5 text-muted shrink-0" /><div><div className="text-xs font-bold text-muted uppercase tracking-wider">Admissions Email</div><div className="text-xs text-muted">Not listed</div></div></div>
-                  )}
-                  {college.address && (<div className="flex items-start gap-3 p-3 rounded-xl border border-border bg-slate-50"><MapPin className="w-5 h-5 text-muted shrink-0 mt-0.5" /><div><div className="text-xs font-bold text-muted uppercase tracking-wider">Address</div><div className="text-sm text-body">{college.address}</div></div></div>)}
                 </div>
               </section>
               <section className="bg-warning/10 border border-warning/20 rounded-xl p-4 text-sm">
@@ -501,12 +478,6 @@ export default function CollegeDetailClient({ college, content = {} }: { college
             <div className="border border-border rounded-2xl p-5 bg-white shadow-card">
               <div className="flex items-center gap-3 mb-3"><div className="w-10 h-10 bg-primary-light rounded-full flex items-center justify-center"><MessageCircle className="w-5 h-5 text-primary" /></div><div><div className="font-bold text-heading text-sm">Talk to a Counsellor</div><div className="text-muted text-xs">Free · Unbiased · 30 min</div></div></div>
               <Link href="/dashboard/counselling" className="block border border-primary text-primary font-semibold text-sm text-center py-2.5 rounded-xl hover:bg-primary-light transition-colors w-full">Book Free Session</Link>
-            </div>
-            <div className="border border-border rounded-2xl p-5 bg-white shadow-card text-sm space-y-2">
-              <div className="font-bold text-heading text-sm mb-3">Contact College</div>
-              {college.website ? (<a href={college.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline text-xs"><Globe className="w-4 h-4 shrink-0" /> Official Website <ExternalLink className="w-3 h-3" /></a>) : (<div className="flex items-center gap-2 text-muted text-xs"><Globe className="w-4 h-4 shrink-0" /> Website not listed</div>)}
-              {college.contact_email ? (<a href={`mailto:${college.contact_email}`} className="flex items-center gap-2 text-primary hover:underline text-xs break-all"><Mail className="w-4 h-4 shrink-0" /> {college.contact_email}</a>) : (<div className="flex items-center gap-2 text-muted text-xs"><Mail className="w-4 h-4 shrink-0" /> Email not listed</div>)}
-              {college.approvals && (<div className="text-muted text-xs pt-2 border-t border-border">Approvals: {college.approvals}</div>)}
             </div>
           </div>
         </div>
