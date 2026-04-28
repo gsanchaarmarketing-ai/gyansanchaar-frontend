@@ -36,9 +36,9 @@ async function request<T>(
     ...(init.headers as Record<string, string> | undefined),
   }
 
-  // 8-second timeout — handles backend cold-start/hibernation on free tier
+  // 30-second timeout — Laravel Cloud free tier can cold-start in 10-15s after hibernation
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 8000)
+  const timeoutId = setTimeout(() => controller.abort(), 30000)
 
   try {
     const res = await fetch(`${API_URL}${path}`, {
@@ -66,6 +66,11 @@ async function request<T>(
 // ── Public (no auth) ─────────────────────────────────────────────────────────
 
 export const publicApi = {
+  // Cheap warm-up ping. Use after login to wake free-tier backend before
+  // redirecting to dashboard so the next request lands on a warm server.
+  healthz: () =>
+    request<{ status: string }>('/healthz', { cache: 'no-store' }).catch(() => ({ status: 'unknown' })),
+
   colleges: (params?: Record<string, string>) =>
     request<CollegesResponse>(`/public/colleges?${new URLSearchParams(params)}`, { cache: 'no-store' }),
 

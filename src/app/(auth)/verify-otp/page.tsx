@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { studentApi } from '@/lib/api'
+import { studentApi, publicApi } from '@/lib/api'
 import { toast } from 'sonner'
 import { GraduationCap, Mail, MessageCircle, RefreshCw } from 'lucide-react'
 
@@ -57,6 +57,10 @@ export default function VerifyOtpPage() {
       }
 
       toast.success(channel === 'email' ? 'Email verified!' : 'Phone verified!')
+
+      // Warm up backend before dashboard redirect — prevents cold-start logout loop
+      try { await publicApi.healthz() } catch {}
+
       // Hard navigation — bypasses Next.js router cache so dashboard
       // renders fresh with the new cookie
       window.location.href = '/dashboard'

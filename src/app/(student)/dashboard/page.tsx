@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation'
 import { getToken } from '@/lib/auth'
-import { studentApi } from '@/lib/api'
+import { studentApi, ApiError } from '@/lib/api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import FirstVisitModal from '@/components/dashboard/FirstVisitModal'
+import DashboardLoadError from '@/components/dashboard/DashboardLoadError'
 import Link from 'next/link'
 import {
   ArrowRight, FileText, Building2, CheckCircle2,
@@ -24,7 +25,15 @@ export default async function DashboardPage() {
       studentApi.me(token),
       studentApi.applications(token),
     ])
-  } catch { redirect('/login') }
+  } catch (err: any) {
+    // Only force logout on 401 (token actually invalid).
+    // Other errors (timeout, 500, network blip) → show retry UI instead of
+    // silently logging the user out. Free-tier cold starts must not = logout.
+    if (err instanceof ApiError && err.status === 401) {
+      redirect('/login')
+    }
+    return <DashboardLoadError />
+  }
 
   const { user, can_submit_application } = me
   const applicationList: any[] = apps?.data ?? []

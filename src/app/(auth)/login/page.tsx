@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { studentApi } from '@/lib/api'
+import { studentApi, publicApi } from '@/lib/api'
 import { GraduationCap, Eye, EyeOff } from 'lucide-react'
 
 const schema = z.object({
@@ -39,12 +39,18 @@ export default function LoginPage() {
 
       toast.success('Logged in!')
 
-      // Hard navigation — guarantees the new cookie is sent on the next request
-      // and the dashboard page renders fresh server-side. router.push() uses
-      // Next.js cache and may render the pre-login version.
+      // Warm up the backend before redirecting — guarantees the next request
+      // (dashboard's me() call) lands on an awake server instead of triggering
+      // a 10-15s cold start that could timeout and bounce user back to login.
       const target = res.requires_otp
         ? `/verify-otp?phone=${encodeURIComponent(res.user?.phone ?? '')}&purpose=login&channel=whatsapp`
         : redirectTo
+
+      try { await publicApi.healthz() } catch {}
+
+      // Hard navigation — guarantees the new cookie is sent on the next request
+      // and the dashboard page renders fresh server-side. router.push() uses
+      // Next.js cache and may render the pre-login version.
       window.location.href = target
     } catch (e: any) {
       const msg = e?.data?.message ?? e?.message ?? 'Login failed'

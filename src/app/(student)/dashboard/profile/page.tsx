@@ -1,15 +1,22 @@
 import { redirect } from 'next/navigation'
 import { getToken } from '@/lib/auth'
-import { studentApi, publicApi } from '@/lib/api'
+import { studentApi, publicApi, ApiError } from '@/lib/api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import ProfileForm from '@/components/dashboard/ProfileForm'
+import DashboardLoadError from '@/components/dashboard/DashboardLoadError'
 
 export default async function ProfilePage() {
   const token = await getToken()
   if (!token) redirect('/login')
+
   let me
-  try { me = await studentApi.me(token) } catch { redirect('/login') }
+  try {
+    me = await studentApi.me(token)
+  } catch (err: any) {
+    if (err instanceof ApiError && err.status === 401) redirect('/login')
+    return <DashboardLoadError />
+  }
   const statesData = await publicApi.states().catch(() => ({ data: [] }))
 
   return (
