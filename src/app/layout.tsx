@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { Toaster } from 'sonner'
+import { Analytics } from '@vercel/analytics/next'
 import QueryProvider from '@/components/layout/QueryProvider'
 import CookieConsent from '@/components/layout/CookieConsent'
 import { getCmsContent } from '@/lib/cms'
@@ -85,6 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <CookieConsent />
           </QueryProvider>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   )
