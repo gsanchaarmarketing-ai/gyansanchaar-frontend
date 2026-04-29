@@ -14,8 +14,9 @@ export default async function ProfilePage() {
   try {
     me = await studentApi.me(token)
   } catch (err: any) {
+    console.error('[profile load failed]', { status: err?.status, message: err?.message, data: err?.data })
     if (err instanceof ApiError && err.status === 401) redirect('/login')
-    return <DashboardLoadError />
+    return <DashboardLoadError reason={err?.message ?? 'Unknown'} status={err?.status ?? 0} />
   }
   const statesData = await publicApi.states().catch(() => ({ data: [] }))
 

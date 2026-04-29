@@ -6,7 +6,7 @@ import { AlertCircle, RefreshCw } from 'lucide-react'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 
-export default function DashboardLoadError() {
+export default function DashboardLoadError({ reason, status }: { reason?: string; status?: number }) {
   const [retrying, setRetrying] = useState(false)
   const [secs, setSecs] = useState(0)
 
@@ -30,10 +30,18 @@ export default function DashboardLoadError() {
             <AlertCircle className="w-8 h-8 text-amber-600" />
           </div>
           <h1 className="text-xl font-bold text-heading mb-2">Couldn't load dashboard</h1>
-          <p className="text-sm text-muted mb-6">
+          <p className="text-sm text-muted mb-4">
             The server is taking longer than usual to respond — likely waking up from idle.
             You're still logged in. {secs > 0 && `(${secs}s)`}
           </p>
+          {(reason || status) && (
+            <div className="bg-slate-100 border border-slate-200 rounded-lg p-3 mb-6 text-left">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Diagnostic</div>
+              <code className="text-xs text-slate-700 break-all">
+                {status ? `HTTP ${status} · ` : ''}{reason}
+              </code>
+            </div>
+          )}
           <button
             onClick={retry}
             disabled={retrying}

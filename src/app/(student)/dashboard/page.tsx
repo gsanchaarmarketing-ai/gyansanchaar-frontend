@@ -26,13 +26,24 @@ export default async function DashboardPage() {
       studentApi.applications(token),
     ])
   } catch (err: any) {
+    // Server-side log so we can see the actual failure on Vercel logs
+    console.error('[dashboard load failed]', {
+      name: err?.name,
+      message: err?.message,
+      status: err?.status,
+      data: err?.data,
+      stack: err?.stack?.split('\n').slice(0, 5).join('\n'),
+      tokenPresent: !!token,
+      tokenPreview: token ? `${token.substring(0, 12)}...` : null,
+    })
+
     // Only force logout on 401 (token actually invalid).
     // Other errors (timeout, 500, network blip) → show retry UI instead of
     // silently logging the user out. Free-tier cold starts must not = logout.
     if (err instanceof ApiError && err.status === 401) {
       redirect('/login')
     }
-    return <DashboardLoadError />
+    return <DashboardLoadError reason={err?.message ?? 'Unknown'} status={err?.status ?? 0} />
   }
 
   const { user, can_submit_application } = me
