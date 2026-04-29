@@ -44,7 +44,7 @@ export default function ProfileForm({ user, states, token }: { user: User; state
     <form onSubmit={handleSubmit(onSubmit)} className="bg-white border rounded-xl p-5 space-y-4">
       {/* Phone verification widget */}
       <PhoneVerificationBlock
-        phone={user.phone}
+        phone={user.phone ?? ''}
         verified={phoneVerified}
         onVerified={() => setPhoneVerified(true)}
       />
