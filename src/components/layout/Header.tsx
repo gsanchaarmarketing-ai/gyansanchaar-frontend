@@ -1,6 +1,8 @@
+'use client'
+
 import Link from 'next/link'
 import { GraduationCap, Bell, Search } from 'lucide-react'
-import { cookies } from 'next/headers'
+import { useEffect, useState } from 'react'
 
 const navLinks = [
   { href: '/colleges',  label: 'Colleges' },
@@ -9,12 +11,14 @@ const navLinks = [
   { href: '/articles',  label: 'News'     },
 ]
 
-export default async function Header() {
-  let isLoggedIn = false
-  try {
-    const jar = await cookies()
-    isLoggedIn = !!jar.get('gs_token')?.value
-  } catch {}
+export default function Header() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const hasToken = document.cookie.split(';').some(c => c.trim().startsWith('gs_token='))
+    setIsLoggedIn(hasToken)
+  }, [])
+
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-border shadow-sm">
