@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { Plus, Trash2, Eye, EyeOff } from 'lucide-react'
+import CloudinaryUpload from '@/components/admin/CloudinaryUpload'
 
 export default function AdminMedia() {
   const sb = createBrowserSupabaseClient()
@@ -45,8 +46,17 @@ export default function AdminMedia() {
         <div className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">Add Media House</div>
         <div className="grid grid-cols-2 gap-3 mb-3">
           <input value={form.name} onChange={e => setForm(p=>({...p,name:e.target.value}))} className={inp} placeholder="e.g. The Hindu" />
-          <input value={form.logo_url} onChange={e => setForm(p=>({...p,logo_url:e.target.value}))} className={inp} placeholder="Logo image URL" type="url" />
           <input value={form.website_url} onChange={e => setForm(p=>({...p,website_url:e.target.value}))} className={inp} placeholder="Website URL (optional)" type="url" />
+          <div className="col-span-2">
+            <CloudinaryUpload
+              label="Logo Image"
+              value={form.logo_url}
+              onChange={v => setForm(p=>({...p, logo_url: v}))}
+              folder="media-logos"
+              aspect="logo"
+              hint="PNG with transparent background preferred"
+            />
+          </div>
           <input value={form.sort_order} onChange={e => setForm(p=>({...p,sort_order:e.target.value}))} className={inp} placeholder="Sort order (0, 1, 2…)" type="number" />
         </div>
         <button onClick={add} className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-sm transition-colors">

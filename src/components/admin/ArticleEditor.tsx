@@ -5,6 +5,7 @@ import { createBrowserSupabaseClient } from '@/lib/supabase'
 import { toast } from 'sonner'
 import { Save, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import CloudinaryUpload from '@/components/admin/CloudinaryUpload'
 
 const CATEGORIES = ['admission_news','exam_updates','career_guidance','college_reviews','scholarships','study_abroad','current_affairs']
 
@@ -71,7 +72,16 @@ export default function ArticleEditor({ article }: { article?: any }) {
             </select>
           </div>
           <div className="col-span-2"><label className={lbl}>Slug</label><input value={form.slug} onChange={f('slug')} className={inp} placeholder="auto-generated" /></div>
-          <div className="col-span-3"><label className={lbl}>Featured Image URL</label><input type="url" value={form.featured_image} onChange={f('featured_image')} className={inp} placeholder="https://..." /></div>
+          <div className="col-span-3">
+            <CloudinaryUpload
+              label="Featured Image"
+              value={form.featured_image}
+              onChange={v => setForm(p => ({ ...p, featured_image: v }))}
+              folder="articles"
+              aspect="landscape"
+              hint="1200×630px recommended for social sharing"
+            />
+          </div>
           <div className="col-span-3"><label className={lbl}>Excerpt (shown on cards)</label><textarea value={form.excerpt} onChange={f('excerpt')} rows={2} className={inp+' resize-none'} /></div>
         </div>
         <div><label className={lbl}>Body Content (HTML supported)</label>

@@ -3,8 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
+import CloudinaryUpload from '@/components/admin/CloudinaryUpload'
+import { youtubeEmbedUrl } from '@/lib/cloudinary'
 import { toast } from 'sonner'
-import { Trash2, Plus, Save, Eye } from 'lucide-react'
+import { Trash2, Plus, Save, Eye, X } from 'lucide-react'
 
 interface Props {
   college: any
@@ -62,6 +64,7 @@ export default function CollegeForm({ college, states, streams, allCourses, link
     h_ac:             college?.hostel_info?.ac_rooms       ?? false,
     h_curfew:         college?.hostel_info?.curfew         ?? '',
     h_notes:          college?.hostel_info?.notes          ?? '',
+    gallery:          college?.gallery                     ?? [],
   })
 
   const [selStreams, setSelStreams]  = useState<number[]>(linkedStreams)
@@ -87,6 +90,7 @@ export default function CollegeForm({ college, states, streams, allCourses, link
         contact_phone: form.contact_phone || null, about: form.about || null,
         fee_notes: form.fee_notes || null, logo_path: form.logo_path || null,
         campus_video_url: form.campus_video_url || null,
+        gallery: form.gallery?.length ? form.gallery : null,
         is_active: form.is_active, is_featured: form.is_featured, ugc_verified: form.ugc_verified,
         placement_data: form.p_rate ? { rate: Number(form.p_rate), avg_package: form.p_avg ? Number(form.p_avg) : null, highest_package: form.p_high ? Number(form.p_high) : null, top_recruiters: form.p_recruiters || null, year: Number(form.p_year), notes: form.p_notes || null } : null,
         hostel_info: (form.h_boys || form.h_girls) ? { boys_hostel: form.h_boys, girls_hostel: form.h_girls, capacity: form.h_capacity ? Number(form.h_capacity) : null, fee_per_year: form.h_fee ? Number(form.h_fee) : null, mess_available: form.h_mess, ac_rooms: form.h_ac, curfew: form.h_curfew || null, notes: form.h_notes || null } : null,
@@ -198,8 +202,32 @@ export default function CollegeForm({ college, states, streams, allCourses, link
             <div><label className={lbl}>Website</label><input type="url" value={form.website} onChange={f('website')} className={inp} placeholder="https://..." /></div>
             <div><label className={lbl}>Contact Email</label><input type="email" value={form.contact_email} onChange={f('contact_email')} className={inp} /></div>
             <div><label className={lbl}>Contact Phone</label><input value={form.contact_phone} onChange={f('contact_phone')} className={inp} /></div>
-            <div><label className={lbl}>Logo URL</label><input type="url" value={form.logo_path} onChange={f('logo_path')} className={inp} placeholder="https://..." /></div>
-            <div><label className={lbl}>Campus Video URL</label><input type="url" value={form.campus_video_url} onChange={f('campus_video_url')} className={inp} /></div>
+            <div className="col-span-2 grid grid-cols-2 gap-4">
+              <div>
+                <CloudinaryUpload
+                  label="College Logo"
+                  value={form.logo_path}
+                  onChange={v => setForm(p => ({ ...p, logo_path: v }))}
+                  folder="colleges/logos"
+                  aspect="logo"
+                  hint="PNG or WebP, transparent background preferred"
+                />
+              </div>
+              <div>
+                <label className={lbl}>Campus Video (YouTube URL)</label>
+                <input type="url" value={form.campus_video_url} onChange={f('campus_video_url')} className={inp}
+                  placeholder="https://youtube.com/watch?v=..." />
+                {form.campus_video_url && youtubeEmbedUrl(form.campus_video_url) && (
+                  <div className="mt-2 rounded-lg overflow-hidden aspect-video bg-black/40">
+                    <iframe src={youtubeEmbedUrl(form.campus_video_url)!}
+                      className="w-full h-full" allowFullScreen />
+                  </div>
+                )}
+                {form.campus_video_url && !youtubeEmbedUrl(form.campus_video_url) && (
+                  <div className="text-[10px] text-rose-400 mt-1">⚠ Not a valid YouTube URL</div>
+                )}
+              </div>
+            </div>
             <div><label className={lbl}>Fee Notes</label><textarea value={form.fee_notes} onChange={f('fee_notes')} rows={3} className={inp+' resize-none col-span-2'} /></div>
           </div>
           {/* Streams */}
@@ -218,12 +246,38 @@ export default function CollegeForm({ college, states, streams, allCourses, link
 
       {/* ── ABOUT ──────────────────────────────────────────────────────────── */}
       {tab === 'About' && (
-        <div>
-          <label className={lbl}>About (HTML supported — use h2, h3, p, strong, ul, li)</label>
-          <textarea value={form.about} onChange={f('about')} rows={20}
-            className={inp+' resize-none font-mono text-xs leading-relaxed'}
-            placeholder="<h2>About {College Name}</h2><p>...</p>" />
-          <div className="mt-2 text-[10px] text-white/20">Supports HTML: &lt;h2&gt; &lt;h3&gt; &lt;p&gt; &lt;strong&gt; &lt;ul&gt;&lt;li&gt; &lt;br&gt;</div>
+        <div className="space-y-4">
+          <div>
+            <label className={lbl}>About (HTML supported — use h2, h3, p, strong, ul, li)</label>
+            <textarea value={form.about} onChange={f('about')} rows={16}
+              className={inp+' resize-none font-mono text-xs leading-relaxed'}
+              placeholder="<h2>About {College Name}</h2><p>...</p>" />
+            <div className="mt-1 text-[10px] text-white/20">Supports: &lt;h2&gt; &lt;h3&gt; &lt;p&gt; &lt;strong&gt; &lt;ul&gt;&lt;li&gt; &lt;br&gt;</div>
+          </div>
+          {/* Gallery */}
+          <div className="pt-4 border-t border-white/5">
+            <label className={lbl}>Campus Gallery Photos</label>
+            <div className="grid grid-cols-3 gap-3 mb-3">
+              {(form.gallery ?? []).map((url: string, i: number) => (
+                <div key={i} className="relative group">
+                  <img src={url} alt="" className="w-full h-24 object-cover rounded-xl bg-white/5" />
+                  <button type="button"
+                    onClick={() => setForm((p: any) => ({ ...p, gallery: p.gallery.filter((_: any, j: number) => j !== i) }))}
+                    className="absolute top-1 right-1 bg-black/60 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </div>
+              ))}
+              <CloudinaryUpload
+                value=""
+                onChange={url => setForm((p: any) => ({ ...p, gallery: [...(p.gallery ?? []), url] }))}
+                folder="colleges/gallery"
+                aspect="landscape"
+                hint="Add photo"
+              />
+            </div>
+            <div className="text-[10px] text-white/20">Upload campus photos — classrooms, labs, hostel, sports</div>
+          </div>
         </div>
       )}
 
