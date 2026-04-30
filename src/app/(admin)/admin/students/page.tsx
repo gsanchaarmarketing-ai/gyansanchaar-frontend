@@ -1,4 +1,5 @@
-import { createServerSupabaseClient, createAdminSupabaseClient } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createAdminSupabaseClient } from '@/lib/supabase'
 import { CheckCircle2, XCircle } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 

@@ -4,7 +4,7 @@
  * All editable text lives in Supabase — admins edit at /admin/settings.
  */
 
-import { createServerSupabaseClient } from '@/lib/supabase'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { createClient } from '@supabase/supabase-js'
 
 /** Server-side: fetch all content (or a specific group) from Supabase. */
