@@ -78,8 +78,8 @@ export default async function CollegesPage({
             ) : (
               <div className="py-16 text-center text-slate-500">
                 <div className="text-4xl mb-3">🏫</div>
-                <div className="font-medium">{apiDown ? 'Loading colleges...' : 'No colleges found'}</div>
-                <div className="text-sm mt-1">{apiDown ? 'Server is waking up — refresh in 15 seconds' : 'Try adjusting your filters'}</div>
+                <div className="font-medium">{apiDown ? 'Could not load colleges' : 'No colleges found'}</div>
+                <div className="text-sm mt-1">{apiDown ? 'Check Supabase environment variables in Vercel' : 'Try adjusting your filters'}</div>
               </div>
             )}
           </section>
