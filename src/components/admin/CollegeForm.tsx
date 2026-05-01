@@ -45,6 +45,7 @@ export default function CollegeForm({ college, states, streams, allCourses, link
     fee_notes:        college?.fee_notes        ?? '',
     logo_path:        college?.logo_path        ?? '',
     campus_video_url: college?.campus_video_url ?? '',
+    google_place_id:  college?.google_place_id  ?? '',
     is_active:        college?.is_active        ?? true,
     is_featured:      college?.is_featured      ?? false,
     ugc_verified:     college?.ugc_verified     ?? false,
@@ -91,6 +92,7 @@ export default function CollegeForm({ college, states, streams, allCourses, link
         fee_notes: form.fee_notes || null, logo_path: form.logo_path || null,
         campus_video_url: form.campus_video_url || null,
         gallery: form.gallery?.length ? form.gallery : null,
+        google_place_id: form.google_place_id || null,
         is_active: form.is_active, is_featured: form.is_featured, ugc_verified: form.ugc_verified,
         placement_data: form.p_rate ? { rate: Number(form.p_rate), avg_package: form.p_avg ? Number(form.p_avg) : null, highest_package: form.p_high ? Number(form.p_high) : null, top_recruiters: form.p_recruiters || null, year: Number(form.p_year), notes: form.p_notes || null } : null,
         hostel_info: (form.h_boys || form.h_girls) ? { boys_hostel: form.h_boys, girls_hostel: form.h_girls, capacity: form.h_capacity ? Number(form.h_capacity) : null, fee_per_year: form.h_fee ? Number(form.h_fee) : null, mess_available: form.h_mess, ac_rooms: form.h_ac, curfew: form.h_curfew || null, notes: form.h_notes || null } : null,
@@ -226,6 +228,14 @@ export default function CollegeForm({ college, states, streams, allCourses, link
                 {form.campus_video_url && !youtubeEmbedUrl(form.campus_video_url) && (
                   <div className="text-[10px] text-rose-400 mt-1">⚠ Not a valid YouTube URL</div>
                 )}
+              </div>
+              <div>
+                <label className={lbl}>Google Place ID</label>
+                <input value={form.google_place_id} onChange={f('google_place_id')} className={inp}
+                  placeholder="ChIJ... (find on maps.google.com → Share → Embed → extract place_id)" />
+                <div className="text-[10px] text-white/20 mt-1">
+                  How to get: Search college on Google Maps → Share → Copy link → extract &place_id= value
+                </div>
               </div>
             </div>
             <div><label className={lbl}>Fee Notes</label><textarea value={form.fee_notes} onChange={f('fee_notes')} rows={3} className={inp+' resize-none col-span-2'} /></div>

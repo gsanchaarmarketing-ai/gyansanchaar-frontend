@@ -6,6 +6,7 @@ import { collegeSchema, breadcrumbSchema, faqSchema } from '@/lib/seo'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import CollegeDetailClient from '@/components/college/CollegeDetailClient'
+import GoogleReviewsCarousel from '@/components/college/GoogleReviewsCarousel'
 
 export const dynamic = 'force-dynamic'
 
@@ -99,6 +100,17 @@ export default async function CollegeDetailPage({ params }: { params: { slug: st
         <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(s) }} />
       ))}
       <CollegeDetailClient college={college} content={content} />
+      {college.google_place_id && (
+        <div className="max-w-5xl mx-auto px-4">
+          <GoogleReviewsCarousel
+            placeId={college.google_place_id}
+            collegeName={college.name}
+            cachedRating={college.google_rating ?? null}
+            cachedCount={college.google_rating_count ?? null}
+            mapsUrl={college.google_maps_url ?? null}
+          />
+        </div>
+      )}
       <MobileNav />
     </>
   )
