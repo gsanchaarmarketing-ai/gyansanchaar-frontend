@@ -15,7 +15,8 @@ import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 
 export async function generateMetadata(): Promise<Metadata> {
-  const content = await getCmsContent('homepage').catch(() => ({} as Record<string, string>))
+  // Fetch all site content keys — homepage uses hero, stats, value, faq, how_it_works groups
+  const content = await getCmsContent().catch(() => ({} as Record<string, string>))
   const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
   const title = c(content, 'home.seo_title', 'GyanSanchaar — Find Your College. Apply Free. No Agent Fees.')
   const desc  = c(content, 'home.seo_description', 'Discover colleges and courses across India. Apply directly — no consultants, no hidden fees.')
@@ -30,13 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = 'force-dynamic'
 
 /* ─── Design-system constants ─────────────────────────────────────── */
-
-const STATS = [
-  { num: '₹0',    label: 'Application Fees' },
-  { num: '10min', label: 'To Apply' },
-  { num: '100%',  label: 'Free for Students' },
-  { num: '8',     label: 'States Covered' },
-]
+// STATS and FAQs are now CMS-driven — built inside the component function
 
 const FEATURES = [
   { icon: Search,       title: 'Smart Search',       desc: 'Filter by rank, fee, city, stream, NAAC grade and more in seconds.' },
@@ -81,21 +76,55 @@ const STREAMS = [
 /* ─── Page ─────────────────────────────────────────────────────────── */
 
 export default async function HomePage() {
-  const [articlesRes, collegesRes, mediaLogosRes] = await Promise.allSettled([
+  const [articlesRes, collegesRes, mediaLogosRes, cmsRes] = await Promise.allSettled([
     getArticles({ limit: 4 }),
     getColleges({ featured: true, limit: 6 }),
     getMediaLogos(),
+    getCmsContent(), // all keys: hero, stats, value, faq, hiw, footer
   ])
 
   const articles   = articlesRes.status   === 'fulfilled' ? articlesRes.value.data : []
   const colleges   = collegesRes.status   === 'fulfilled' ? collegesRes.value.data : []
   const mediaLogos = mediaLogosRes.status === 'fulfilled' ? mediaLogosRes.value     : []
+  const cms        = cmsRes.status        === 'fulfilled' ? cmsRes.value            : {} as Record<string, string>
 
+  // CMS-driven FAQ (fallback to hardcoded if DB empty)
   const faqs = [
-    { q: 'Is GyanSanchaar free for students?', a: 'Yes. GyanSanchaar is completely free for students. We charge colleges, not students.' },
-    { q: 'Which states does GyanSanchaar cover?', a: 'We currently cover Assam, Meghalaya, Tripura, Nagaland, Manipur, Mizoram, Arunachal Pradesh, and Sikkim.' },
-    { q: 'How does counselling work?', a: 'Each college has assigned admissions counsellors. Once you apply, their counsellor contacts you directly.' },
-    { q: 'Can I apply to multiple colleges?', a: 'Yes. One profile, multiple colleges — all from your dashboard.' },
+    {
+      q: c(cms, 'faq.1_q', 'Is GyanSanchaar free for students?'),
+      a: c(cms, 'faq.1_a', 'Yes. GyanSanchaar is completely free for students. We charge colleges, not students.'),
+    },
+    {
+      q: c(cms, 'faq.2_q', 'Which states does GyanSanchaar cover?'),
+      a: c(cms, 'faq.2_a', 'We currently cover colleges across India including all Northeast states and major metros.'),
+    },
+    {
+      q: c(cms, 'faq.3_q', 'Can I apply to multiple colleges?'),
+      a: c(cms, 'faq.3_a', 'Yes. One profile, multiple colleges — all from your dashboard.'),
+    },
+    {
+      q: c(cms, 'faq.4_q', 'Is my data safe?'),
+      a: c(cms, 'faq.4_a', 'Yes. GyanSanchaar is fully compliant with the DPDP Act 2023. Your data is encrypted and never sold.'),
+    },
+    {
+      q: c(cms, 'faq.5_q', 'Do I need to pay for counselling?'),
+      a: c(cms, 'faq.5_a', 'Basic counselling and college matching is free. Premium one-on-one sessions may have a fee.'),
+    },
+  ]
+
+  // CMS-driven stats
+  const stats = [
+    { num: c(cms, 'stats.1_num', '₹0'),   label: c(cms, 'stats.1_label', 'Application Fees') },
+    { num: c(cms, 'stats.2_num', '10min'),label: c(cms, 'stats.2_label', 'To Apply')          },
+    { num: c(cms, 'stats.3_num', '100%'), label: c(cms, 'stats.3_label', 'Free for Students') },
+    { num: c(cms, 'stats.4_num', '23'),   label: c(cms, 'stats.4_label', 'Partner Colleges')  },
+  ]
+
+  // CMS-driven how-it-works
+  const steps = [
+    { title: c(cms, 'hiw.step_1_title', 'Create your free profile'), body: c(cms, 'hiw.step_1_body', 'Fill basic details — name, phone, marks. Takes 10 minutes. No documents needed to start.') },
+    { title: c(cms, 'hiw.step_2_title', 'Browse and apply'),         body: c(cms, 'hiw.step_2_body', 'Explore colleges by location, stream and fees. Apply to as many as you want with one click.') },
+    { title: c(cms, 'hiw.step_3_title', 'Get your admission letter'),body: c(cms, 'hiw.step_3_body', 'Colleges review your profile and send admission letters directly through GyanSanchaar.') },
   ]
 
   return (
@@ -211,7 +240,7 @@ export default async function HomePage() {
           <div className="max-w-container mx-auto px-6">
             {/* Stats row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-              {STATS.map(s => (
+              {stats.map(s => (
                 <div key={s.label} className="text-center">
                   <div className="text-3xl font-extrabold text-primary">{s.num}</div>
                   <div className="text-xs text-muted mt-1 font-medium">{s.label}</div>
@@ -269,18 +298,14 @@ export default async function HomePage() {
               {/* connector line */}
               <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-px bg-border z-0" />
 
-              {HOW_IT_WORKS.map((step, i) => (
-                <div key={step.num} className="relative z-10 flex flex-col items-center text-center px-4 pb-8 md:pb-0">
-                  {/* Step number bubble */}
-                  <div className="w-20 h-20 rounded-2xl bg-accent-gradient flex flex-col items-center justify-center mb-5 shadow-lg shadow-primary/20">
-                    <step.icon className="w-7 h-7 text-white mb-0.5" />
-                    <span className="text-[10px] text-white/70 font-bold">{step.num}</span>
+              {steps.map((step, i) => (
+                <div key={i} className="relative z-10 flex flex-col items-center text-center px-4 pb-8 md:pb-0">
+                  <div className="w-16 h-16 rounded-2xl bg-accent-gradient flex items-center justify-center mb-5 shadow-lg shadow-primary/20">
+                    <span className="text-white font-black text-xl">0{i+1}</span>
                   </div>
                   <h3 className="font-bold text-heading text-base mb-2">{step.title}</h3>
-                  <p className="text-body text-sm leading-relaxed">{step.desc}</p>
-
-                  {/* Mobile connector */}
-                  {i < HOW_IT_WORKS.length - 1 && (
+                  <p className="text-body text-sm leading-relaxed">{step.body}</p>
+                  {i < steps.length - 1 && (
                     <div className="md:hidden w-px h-8 bg-border my-2" />
                   )}
                 </div>
