@@ -1,17 +1,16 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
 import { GraduationCap, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
+import { Toaster } from 'sonner'
 
 export default function AdminLogin() {
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [show,     setShow]     = useState(false)
   const [loading,  setLoading]  = useState(false)
-  const router = useRouter()
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -35,6 +34,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-[#0f1117] flex items-center justify-center p-4">
+      <Toaster theme="dark" position="top-right" />
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2.5 mb-4">
