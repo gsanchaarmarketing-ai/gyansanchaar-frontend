@@ -70,7 +70,7 @@ export default async function CollegesPage({
           <section className="flex-1">
             {colleges && colleges.data?.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                   {colleges.data.map((c: any) => <CollegeCard key={c.id} college={c as any} />)}
                 </div>
                 {/* Pagination — TODO: implement offset-based pagination with Supabase */}
