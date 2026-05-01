@@ -1,33 +1,34 @@
-import { getClientToken } from '@/lib/client-auth'
 'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { studentApi, type Course } from '@/lib/api'
+import { applyToCollege } from '@/lib/student-api'
 import { toast } from 'sonner'
 
-interface Props { collegeId: number; collegeName: string; courses: Course[] }
+interface CourseOption { id: number; name: string; level: string }
+interface Props { collegeId: number; collegeName: string; courses: CourseOption[] }
 
 export default function ApplyButton({ collegeId, collegeName, courses }: Props) {
   const router = useRouter()
-  const [open, setOpen] = useState(false)
+  const [open,           setOpen]           = useState(false)
   const [selectedCourse, setSelectedCourse] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [loading,        setLoading]        = useState(false)
 
   async function apply() {
     if (!selectedCourse) { toast.error('Please select a course'); return }
     setLoading(true)
     try {
-      const token = await getClientToken()
-      if (!token) { router.push('/login'); return }
-      await studentApi.applyToCollege(token, { college_id: collegeId, course_id: Number(selectedCourse) })
+      await applyToCollege({ college_id: collegeId, course_id: Number(selectedCourse) })
       toast.success(`Applied to ${collegeName}!`)
       router.push('/dashboard/applications')
     } catch (e: any) {
-      if (e.status === 401) router.push('/login')
-      else if (e.status === 403 && e.data?.code === 'PARENTAL_CONSENT_REQUIRED')
+      if (e.message?.includes('not authenticated') || e.message?.includes('401')) {
+        router.push('/login')
+      } else if (e.message?.includes('parental consent') || e.message?.includes('403')) {
         router.push('/dashboard/parental-consent')
-      else toast.error(e.message ?? 'Apply failed')
+      } else {
+        toast.error(e.message ?? 'Apply failed')
+      }
     } finally { setLoading(false) }
   }
 
@@ -43,7 +44,9 @@ export default function ApplyButton({ collegeId, collegeName, courses }: Props) 
       <select value={selectedCourse} onChange={e => setSelectedCourse(e.target.value)}
         className="w-full px-3 py-2 rounded-lg text-slate-900 text-sm border-0">
         <option value="">Select course…</option>
-        {courses.map(c => <option key={c.id} value={c.id}>{c.name} ({c.level?.toUpperCase()})</option>)}
+        {courses.map(c => (
+          <option key={c.id} value={c.id}>{c.name} ({c.level?.toUpperCase()})</option>
+        ))}
       </select>
       <button onClick={apply} disabled={loading}
         className="w-full bg-amber-400 hover:bg-amber-500 text-slate-900 font-semibold py-2 rounded-lg transition-colors disabled:opacity-60">

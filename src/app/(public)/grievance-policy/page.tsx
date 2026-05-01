@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
-import { publicApi } from '@/lib/api'
+import { getCmsContent } from '@/lib/cms'
 
 export const metadata: Metadata = {
   title: 'Grievance Redressal Policy — GyanSanchaar',
@@ -13,7 +13,7 @@ export const revalidate = 86400
 
 export default async function GrievancePolicyPage() {
   let officer = null
-  try { officer = await publicApi.grievanceOfficer() } catch {}
+  try { const cmsData = await getCmsContent('footer'); officer = { name: 'Grievance Officer', email: cmsData['footer.grievance_email'] ?? 'grievance@gyansanchaar.com', phone: null, ack_sla_hours: 24, resolution_sla_days: 15 } } catch {}
 
   return (
     <>

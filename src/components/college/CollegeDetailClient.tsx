@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { getClientToken } from '@/lib/client-auth'
-import { studentApi } from '@/lib/api'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getProfile } from '@/lib/student-api'
+import { applyToCollege } from '@/lib/student-api'
 import {
   MapPin, Award, BadgeCheck,
   ChevronRight, MessageCircle, BookOpen, IndianRupee,
@@ -20,13 +21,15 @@ function ApplyCTA({ college }: { college: any }) {
   const [authState, setAuthState] = useState<'loading' | 'guest' | 'needsProfile' | 'ready'>('loading')
 
   useEffect(() => {
-    getClientToken().then(async token => {
-      if (!token) { setAuthState('guest'); return }
+    (async () => {
+      const sb = createBrowserSupabaseClient()
+      const { data: { user } } = await sb.auth.getUser()
+      if (!user) { setAuthState('guest'); return }
       try {
-        const me = await studentApi.me(token)
+        const me: any = await getProfile()
         setAuthState(me.can_submit_application ? 'ready' : 'needsProfile')
       } catch { setAuthState('guest') }
-    })
+    })()
   }, [])
 
   const courses = college.courses ?? []
@@ -57,9 +60,7 @@ function CollegeApplyPicker({ college, courses }: { college: any; courses: any[]
     if (!selectedCourse) return
     setLoading(true)
     try {
-      const token = await getClientToken()
-      if (!token) { router.push('/login'); return }
-      await studentApi.applyToCollege(token, { college_id: college.id, course_id: Number(selectedCourse) })
+      await applyToCollege({ college_id: college.id, course_id: Number(selectedCourse) })
       setSuccess(true)
       setTimeout(() => router.push('/dashboard/applications'), 1500)
     } catch (e: any) {
@@ -94,13 +95,14 @@ function CourseApplyButton({ college, course }: { college: any; course: any }) {
   const [state, setState] = useState<'idle' | 'loading' | 'done'>('idle')
 
   async function apply() {
-    const token = await getClientToken()
-    if (!token) { router.push('/register'); return }
+    const { data: { user } } = await createBrowserSupabaseClient().auth.getUser()
+    if (!user) { router.push('/register'); return }
     setState('loading')
     try {
-      const me = await studentApi.me(token)
-      if (!me.can_submit_application) { router.push('/dashboard/application'); return }
-      await studentApi.applyToCollege(token, { college_id: college.id, course_id: course.id })
+      const { data: me } = await createBrowserSupabaseClient().from('profiles').select('father_name,address,phone_verified_at').eq('id', user.id).single()
+      const profileComplete = me?.father_name && me?.address && me?.phone_verified_at
+      if (!profileComplete) { router.push('/dashboard/application'); return }
+      await applyToCollege({ college_id: college.id, course_id: course.id })
       setState('done')
       setTimeout(() => router.push('/dashboard/applications'), 1200)
     } catch (e: any) {

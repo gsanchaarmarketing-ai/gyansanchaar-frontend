@@ -1,7 +1,8 @@
+import type { State, Stream } from '@/types'
 'use client'
 
 import { useRouter } from 'next/navigation'
-import type { State, Stream } from '@/lib/api'
+
 
 interface Props { states: State[]; streams: Stream[]; current: Record<string,string> }
 

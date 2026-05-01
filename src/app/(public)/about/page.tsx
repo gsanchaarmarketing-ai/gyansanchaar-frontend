@@ -9,7 +9,9 @@ import {
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import { breadcrumbSchema, organizationSchema } from '@/lib/seo'
-import { publicApi } from '@/lib/api'
+import { getTeam } from '@/lib/supabase-api'
+
+export const dynamic = 'force-dynamic'
 
 const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
 
@@ -70,17 +72,9 @@ const MOCK_TEAM = [
   },
 ]
 
-async function getTeam() {
-  try {
-    const res  = await publicApi.team()
-    const data = res.data ?? []
-    if (!data.length) return MOCK_TEAM
-    return data
-  } catch { return MOCK_TEAM }
-}
-
 export default async function AboutPage() {
-  const team      = await getTeam()
+  let team: any[] = []
+  try { team = await getTeam() } catch { team = MOCK_TEAM }
   const founders  = team.filter((m: any) => m.role_type === 'founder')
   const mentors   = team.filter((m: any) => m.role_type === 'mentor')
 

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { Article } from '@/lib/api'
+import type { Article } from '@/types'
 
 export default function ArticleCard({ article }: { article: Article }) {
   return (

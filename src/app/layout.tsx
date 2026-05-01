@@ -66,7 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_API_URL ?? ''} />
+        <link rel="dns-prefetch" href="https://iwgsqaezapwxhjadnfvm.supabase.co" />
         {/* JSON-LD: Website + Organization — on every page */}
         <script
           type="application/ld+json"

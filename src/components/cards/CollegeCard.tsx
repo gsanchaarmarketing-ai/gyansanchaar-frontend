@@ -1,6 +1,7 @@
+import type { College } from '@/types'
 import Link from 'next/link'
 import { MapPin, Award } from 'lucide-react'
-import type { College } from '@/lib/api'
+
 import { cn } from '@/lib/utils'
 
 export default function CollegeCard({ college }: { college: College }) {

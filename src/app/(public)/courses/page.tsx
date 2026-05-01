@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
-import { publicApi } from '@/lib/api'
+import { getCourses, getStreams } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import { Clock, IndianRupee, ChevronRight, BookOpen } from 'lucide-react'
@@ -53,11 +53,11 @@ const LEVEL_COLORS: Record<string, string> = {
 
 export default async function CoursesPage({ searchParams }: { searchParams: Record<string, string> }) {
   const [coursesRes, streamsRes] = await Promise.allSettled([
-    publicApi.courses({ ...searchParams, per_page: '20' }),
-    publicApi.streams(),
+    getCourses({ level: searchParams.level, stream_id: searchParams.stream_id ? Number(searchParams.stream_id) : undefined, limit: 20 }),
+    getStreams(),
   ])
   const courses = coursesRes.status === 'fulfilled' ? coursesRes.value : null
-  const streams = streamsRes.status === 'fulfilled' ? streamsRes.value.data : []
+  const streams = streamsRes.status === 'fulfilled' ? streamsRes.value : []
 
   const LEVELS = ['ug', 'pg', 'diploma', 'phd', 'certificate']
 
@@ -65,7 +65,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'Courses in India',
-    numberOfItems: courses?.meta?.total ?? 0,
+    numberOfItems: courses?.count ?? 0,
     itemListElement: courses.data.map((c: any, i: number) => ({
       '@type': 'ListItem', position: i + 1, name: c.name,
       url: `${BASE}/courses/${c.slug}`,
@@ -84,7 +84,7 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
             <div className="text-xs font-bold text-white/40 uppercase tracking-widest mb-2">Explore</div>
             <h1 className="text-3xl md:text-4xl font-extrabold mb-2">Courses in India</h1>
             <p className="text-white/60 text-sm">
-              {courses?.meta?.total?.toLocaleString() ?? '…'} courses · UG, PG, Diploma, PhD
+              {courses?.count?.toLocaleString() ?? '…'} courses · UG, PG, Diploma, PhD
             </p>
           </div>
         </div>
@@ -184,24 +184,13 @@ export default async function CoursesPage({ searchParams }: { searchParams: Reco
             </div>
           )}
 
-          {/* Pagination */}
-          {courses?.meta && courses.meta.last_page > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-8">
-              {courses.meta.current_page > 1 && (
-                <Link href={`/courses?${new URLSearchParams({ ...searchParams, page: String(courses.meta.current_page - 1) })}`}
-                  className="px-4 py-2 border border-border rounded-xl text-sm hover:border-primary text-body">
-                  ← Previous
-                </Link>
-              )}
-              <span className="text-sm text-muted px-3">
-                Page {courses.meta.current_page} of {courses.meta.last_page}
-              </span>
-              {courses.meta.current_page < courses.meta.last_page && (
-                <Link href={`/courses?${new URLSearchParams({ ...searchParams, page: String(courses.meta.current_page + 1) })}`}
-                  className="px-4 py-2 border border-border rounded-xl text-sm hover:border-primary text-body">
-                  Next →
-                </Link>
-              )}
+          {/* Pagination — offset-based, use ?page=N */}
+          {courses && courses.count > courses.data.length && (
+            <div className="flex items-center justify-center mt-8">
+              <Link href={`/courses?${new URLSearchParams({ ...searchParams, page: String((Number(searchParams.page ?? 1)) + 1) })}`}
+                className="px-5 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary-hover transition-colors">
+                Load more courses →
+              </Link>
             </div>
           )}
         </div>

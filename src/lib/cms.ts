@@ -1,20 +1,16 @@
 /**
- * CMS content fetcher — reads from Supabase site_contents table.
- * Replaces the old Laravel /api/v1/public/content endpoint.
- * All editable text lives in Supabase — admins edit at /admin/settings.
+ * CMS content fetcher — reads from Supabase site_contents.
+ * Falls back to empty strings if Supabase is unavailable (build time).
  */
 
-import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { createClient } from '@supabase/supabase-js'
+const SUPABASE_URL  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? ''
+const SUPABASE_ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 
-/** Server-side: fetch all content (or a specific group) from Supabase. */
 export async function getCmsContent(group?: string): Promise<Record<string, string>> {
+  if (!SUPABASE_URL || !SUPABASE_ANON) return {}
   try {
-    // Use public anon client — site_contents is public read
-    const sb = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
+    const { createClient } = await import('@supabase/supabase-js')
+    const sb = createClient(SUPABASE_URL, SUPABASE_ANON)
     let q = sb.from('site_contents').select('key,value')
     if (group) q = q.eq('group_name', group)
     const { data } = await q
@@ -25,15 +21,6 @@ export async function getCmsContent(group?: string): Promise<Record<string, stri
   }
 }
 
-/** Synchronous getter for client components (pass pre-fetched content map). */
 export function c(content: Record<string, string>, key: string, fallback = ''): string {
   return content[key] ?? fallback
-}
-
-/** Update a single content key (admin only, server action). */
-export async function updateCmsKey(key: string, value: string): Promise<void> {
-  const sb = await createServerSupabaseClient()
-  await sb.from('site_contents')
-    .update({ value, updated_at: new Date().toISOString() })
-    .eq('key', key)
 }

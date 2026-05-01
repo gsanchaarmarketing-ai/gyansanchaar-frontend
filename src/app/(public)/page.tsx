@@ -6,10 +6,9 @@ import {
   CalendarCheck, Users, Award, MapPin, ChevronRight,
   Zap, Clock, BadgeCheck
 } from 'lucide-react'
-import { publicApi } from '@/lib/api'
+import { getColleges, getArticles, getMediaLogos } from '@/lib/supabase-api'
 import MediaMarquee from '@/components/media/MediaMarquee'
 import Footer from '@/components/layout/Footer'
-import { getToken } from '@/lib/auth'
 import { getCmsContent, c } from '@/lib/cms'
 import { breadcrumbSchema, howItWorksSchema, faqSchema } from '@/lib/seo'
 import Header from '@/components/layout/Header'
@@ -82,17 +81,20 @@ const STREAMS = [
 /* ─── Page ─────────────────────────────────────────────────────────── */
 
 export default async function HomePage() {
-  const token = await getToken().catch(() => null)
-  const isLoggedIn = !!token
+  const { createServerSupabaseClient } = await import('@/lib/supabase-server')
+  const sb = await createServerSupabaseClient()
+  const { data: { user } } = await sb.auth.getUser()
+  const isLoggedIn = !!user
+
   const [articlesRes, collegesRes, mediaLogosRes] = await Promise.allSettled([
-    publicApi.articles({ per_page: '4' }),
-    publicApi.colleges({ per_page: '6', featured: 'true', sort: 'nirf' }),
-    publicApi.mediaLogos(),
+    getArticles({ limit: 4 }),
+    getColleges({ featured: true, limit: 6 }),
+    getMediaLogos(),
   ])
 
-  const articles   = articlesRes.status   === 'fulfilled' ? articlesRes.value.data   : []
-  const colleges   = collegesRes.status   === 'fulfilled' ? collegesRes.value.data   : []
-  const mediaLogos = mediaLogosRes.status === 'fulfilled' ? mediaLogosRes.value.data : []
+  const articles   = articlesRes.status   === 'fulfilled' ? articlesRes.value.data : []
+  const colleges   = collegesRes.status   === 'fulfilled' ? collegesRes.value.data : []
+  const mediaLogos = mediaLogosRes.status === 'fulfilled' ? mediaLogosRes.value     : []
 
   const faqs = [
     { q: 'Is GyanSanchaar free for students?', a: 'Yes. GyanSanchaar is completely free for students. We charge colleges, not students.' },
@@ -134,9 +136,9 @@ export default async function HomePage() {
 
               {/* CTA row */}
               <div className="flex flex-wrap gap-3 mb-8">
-                <Link href={isLoggedIn ? '/dashboard' : '/register'}
+                <Link href='/register'
                   className="inline-flex items-center gap-2 bg-white text-primary font-bold px-6 py-3.5 rounded-xl hover:bg-primary-light transition-all shadow-lg text-sm">
-                  {isLoggedIn ? 'Go to Dashboard' : 'Start Free Application'} <ArrowRight className="w-4 h-4" />
+                  Start Free Application <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link href="/colleges"
                   className="inline-flex items-center gap-2 border border-white/30 text-white font-medium px-6 py-3.5 rounded-xl hover:bg-white/10 transition-all text-sm">

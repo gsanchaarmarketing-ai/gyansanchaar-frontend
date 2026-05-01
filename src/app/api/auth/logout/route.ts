@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 
-export async function POST() {
-  const res = NextResponse.json({ ok: true })
-  res.cookies.delete('gs_token')
-  return res
+export async function GET() {
+  const sb = await createServerSupabaseClient()
+  await sb.auth.signOut()
+  return NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'))
 }

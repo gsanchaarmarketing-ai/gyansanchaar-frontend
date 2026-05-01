@@ -1,17 +1,19 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { publicApi } from '@/lib/api'
+import { getArticleBySlug, getArticles } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import SafeHtml from '@/components/ui/SafeHtml'
 import Link from 'next/link'
 import { ArrowLeft, Clock, Calendar, User, BookOpen, ChevronDown, ArrowRight, Share2 } from 'lucide-react'
 
+export const dynamic = 'force-dynamic'
+
 export const revalidate = 300
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
-    const { data: a } = await publicApi.article(params.slug)
+    const a = await getArticleBySlug(params.slug)
     const title = `${a.meta_title ?? a.title} | GyanSanchaar`
     const description = a.meta_description ?? a.excerpt ?? ''
     return {
@@ -66,12 +68,12 @@ export default async function ArticleDetailPage({ params }: { params: { slug: st
   let related: any[] = []
 
   try {
-    const res = await publicApi.article(params.slug)
+    const res = { data: await getArticleBySlug(params.slug) }
     article = res.data
   } catch { notFound() }
 
   try {
-    const relRes = await publicApi.articles({ category: article.category, per_page: '3' })
+    const relRes = { data: (await getArticles({ category: article.category, limit: 3 })).data }
     related = relRes.data.filter((a: any) => a.slug !== article.slug).slice(0, 3)
   } catch {}
 

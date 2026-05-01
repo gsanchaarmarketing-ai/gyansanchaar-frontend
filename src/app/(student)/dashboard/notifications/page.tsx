@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { getToken } from '@/lib/auth'
-import { studentApi } from '@/lib/api'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
@@ -69,21 +69,18 @@ function notifBody(app: any): string {
 }
 
 export default async function NotificationsPage() {
-  const token = await getToken()
-  if (!token) redirect('/login')
+  const sb = await createServerSupabaseClient()
+  const { data: { user } } = await sb.auth.getUser()
+  if (!user) redirect('/login')
 
-  let apps: any[] = []
-  try {
-    const res = await studentApi.applications(token)
-    apps = res.data ?? []
-  } catch { redirect('/login') }
+  const { data: apps } = await sb.from('applications').select('id,status,admission_letter_path,interview_at,colleges(name),courses(name),updated_at').eq('student_id', user.id).is('deleted_at', null).order('updated_at', { ascending: false })
 
   // Sort by most recently updated (use updated_at if available, else created_at)
-  const sorted = [...apps].sort((a, b) =>
-    new Date(b.updated_at ?? b.created_at).getTime() - new Date(a.updated_at ?? a.created_at).getTime()
+  const sorted = [...(apps ?? [])].sort((a, b) =>
+    new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
   )
 
-  const hasLetter = sorted.some(a => a.status === 'admitted' && a.admission_letter_path)
+  const hasLetter = sorted.some((a:any) => a.status === 'admitted' && a.admission_letter_path)
 
   return (
     <>
@@ -161,7 +158,7 @@ export default async function NotificationsPage() {
                           {notifTitle(app)}
                         </p>
                         <span className="text-[11px] text-muted flex-shrink-0">
-                          {timeAgo(app.updated_at ?? app.created_at)}
+                          {timeAgo(app.updated_at)}
                         </span>
                       </div>
                       <p className="text-xs text-body mt-1 leading-relaxed line-clamp-2">

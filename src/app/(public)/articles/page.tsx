@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
-import { publicApi } from '@/lib/api'
+import { getArticles } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
 import { BookOpen, Clock, ArrowRight, Search, ChevronRight } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Education News, Guides & Admission Alerts 2026 | GyanSanchaar',
@@ -32,7 +34,7 @@ const CAT_COLORS: Record<string, string> = {
 }
 
 export default async function ArticlesPage({ searchParams }: { searchParams: Record<string, string> }) {
-  const res = await publicApi.articles({ ...searchParams, per_page: '12' }).catch(() => null)
+  const res = await getArticles({ q: searchParams.q, category: searchParams.category, limit: 12 }).catch(() => null)
   const articles = res?.data ?? []
   const activecat = searchParams.category ?? ''
 

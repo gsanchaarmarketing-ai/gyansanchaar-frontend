@@ -1,15 +1,13 @@
 'use client'
-// Client wrapper for Header — used only in 'use client' pages
-// Reads auth state via cookie on client side
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { GraduationCap, Bell, Search } from 'lucide-react'
-import { getClientToken } from '@/lib/client-auth'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
 
 const navLinks = [
   { href: '/colleges', label: 'Colleges' },
-  { href: '/courses',  label: 'Courses' },
-  { href: '/exams',    label: 'Exams' },
+  { href: '/courses',  label: 'Courses'  },
+  { href: '/exams',    label: 'Exams'    },
   { href: '/articles', label: 'News'     },
 ]
 
@@ -17,7 +15,14 @@ export default function HeaderClient() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
   useEffect(() => {
-    getClientToken().then(token => setIsLoggedIn(!!token))
+    const sb = createBrowserSupabaseClient()
+    // Get current session
+    sb.auth.getSession().then(({ data: { session } }) => setIsLoggedIn(!!session))
+    // Subscribe to auth changes (login/logout updates header live)
+    const { data: { subscription } } = sb.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session)
+    })
+    return () => subscription.unsubscribe()
   }, [])
 
   return (
@@ -57,9 +62,7 @@ export default function HeaderClient() {
           )}
         </div>
         <div className="md:hidden flex items-center gap-2">
-          <Link href="/search"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-body hover:text-primary"
-            aria-label="Search">
+          <Link href="/search" className="w-8 h-8 flex items-center justify-center rounded-lg text-body hover:text-primary" aria-label="Search">
             <Search className="w-4 h-4" />
           </Link>
           {isLoggedIn ? (

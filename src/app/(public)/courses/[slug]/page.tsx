@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { publicApi, ApiError } from '@/lib/api'
+import { getCourseBySlug } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import CourseDetailClient from '@/components/course/CourseDetailClient'
 import { breadcrumbSchema } from '@/lib/seo'
+
+export const dynamic = 'force-dynamic'
 
 export const revalidate = 300
 
@@ -13,7 +15,7 @@ const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
-    const { data: c } = await publicApi.course(params.slug)
+    const c = await getCourseBySlug(params.slug)
     const fees = c.fee_min && c.fee_max
       ? `₹${Math.round(c.fee_min / 1000)}K–${Math.round(c.fee_max / 1000)}K/yr`
       : c.default_fee ? `₹${Math.round((c.default_fee as number) / 1000)}K/yr` : 'varies'
@@ -32,10 +34,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function CourseDetailPage({ params }: { params: { slug: string } }) {
   let course: any = null
   try {
-    const r = await publicApi.course(params.slug)
+    const r = { data: await getCourseBySlug(params.slug) }
     course = r.data
   } catch (err) {
-    if (err instanceof ApiError && err.status === 404) notFound()
+    notFound()
     // Any other error — show not found rather than crashing
     notFound()
   }

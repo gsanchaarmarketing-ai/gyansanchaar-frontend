@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { publicApi, type Exam, ApiError } from '@/lib/api'
+import { getExamBySlug } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
 import { Calendar, ExternalLink, BookOpen, CheckCircle, ArrowRight } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 
 interface Props { params: { slug: string } }
 
@@ -12,7 +14,7 @@ export const revalidate = 3600
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
-    const { data: exam } = await publicApi.exam(params.slug)
+    const exam = await getExamBySlug(params.slug)
     const desc = `${exam.name} ${new Date().getFullYear()} — eligibility, exam dates, pattern and preparation tips.`
     return {
       title: `${exam.name} ${new Date().getFullYear()} — Dates, Eligibility, Pattern | GyanSanchaar`,
@@ -31,13 +33,13 @@ function fmtDate(d: string | null) {
 }
 
 export default async function ExamDetailPage({ params }: Props) {
-  let exam: Exam | null = null
+  let exam: any = null
 
   try {
-    const r = await publicApi.exam(params.slug)
+    const r = { data: await getExamBySlug(params.slug) }
     exam = r.data
   } catch (err) {
-    if (err instanceof ApiError && err.status === 404) notFound()
+    notFound()
     throw err
   }
 
@@ -73,7 +75,7 @@ export default async function ExamDetailPage({ params }: Props) {
           )}
           {exam.streams && exam.streams.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {exam.streams.map(s => (
+              {exam.streams.map((s: any) => (
                 <span key={s.id} className="bg-white/20 text-white text-xs px-2.5 py-1 rounded-full">{s.name}</span>
               ))}
             </div>

@@ -1,8 +1,8 @@
 'use client'
-import { useState } from 'react'
-import { GraduationCap, CheckCircle, AlertCircle } from 'lucide-react'
 
-const BACKEND = 'https://gyansanchaar-backend-main-q8sodv.free.laravel.cloud/api/v1'
+import { useState } from 'react'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { GraduationCap, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function ParentConsentPage({ params }: { params: { token: string } }) {
   const [otp,     setOtp]     = useState('')
@@ -14,18 +14,40 @@ export default function ParentConsentPage({ params }: { params: { token: string 
     if (otp.length < 6) { setError('Enter 6-digit OTP'); return }
     setLoading(true); setError('')
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? BACKEND
-      const res = await fetch(`${apiBase}/student/parental-consent/verify`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({ code: otp, token: params.token }),
-      })
-      if (res.ok) {
-        setResult('success')
-      } else {
-        const d = await res.json()
-        setError(d.message ?? 'Invalid or expired OTP. Please try again.')
+      const sb = createBrowserSupabaseClient()
+
+      // Look up the parental consent record by token
+      const { data: consent, error: fetchErr } = await sb
+        .from('parental_consents')
+        .select('*')
+        .eq('verification_token', params.token)
+        .is('verified_at', null)
+        .single()
+
+      if (fetchErr || !consent) {
+        setError('Invalid or expired link. Please ask your ward to request a new one.')
+        return
       }
+
+      // Check OTP matches
+      if (consent.code_hash !== otp) {
+        setError('Incorrect OTP. Please try again.')
+        return
+      }
+
+      // Mark verified
+      await sb.from('parental_consents').update({
+        verified_at: new Date().toISOString(),
+        verified_ip: null,
+      }).eq('id', consent.id)
+
+      // Update student profile
+      await sb.from('profiles').update({
+        parental_consent_verified: true,
+        parental_consent_at: new Date().toISOString(),
+      }).eq('id', consent.user_id)
+
+      setResult('success')
     } catch {
       setError('Network error. Please check your connection and try again.')
     } finally {
@@ -67,11 +89,8 @@ export default function ParentConsentPage({ params }: { params: { token: string 
                 Enter the OTP sent to your WhatsApp number
               </label>
               <input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                value={otp}
-                onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
+                type="text" inputMode="numeric" maxLength={6}
+                value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ''))}
                 placeholder="6-digit OTP"
                 className="w-full border border-border rounded-xl px-4 py-3 text-center text-xl font-bold tracking-widest mb-3 focus:outline-none focus:border-primary"
               />
@@ -80,11 +99,8 @@ export default function ParentConsentPage({ params }: { params: { token: string 
                   <AlertCircle className="w-4 h-4 shrink-0" /> {error}
                 </p>
               )}
-              <button
-                onClick={verify}
-                disabled={loading || otp.length < 6}
-                className="w-full bg-primary text-white py-3 rounded-xl font-semibold disabled:opacity-60 hover:bg-primary-hover transition-colors"
-              >
+              <button onClick={verify} disabled={loading || otp.length < 6}
+                className="w-full bg-primary text-white py-3 rounded-xl font-semibold disabled:opacity-60 hover:bg-primary-hover transition-colors">
                 {loading ? 'Verifying…' : 'Verify & Give Consent'}
               </button>
               <p className="text-xs text-slate-400 mt-4 text-center leading-relaxed">

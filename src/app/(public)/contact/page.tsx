@@ -2,7 +2,9 @@ import type { Metadata } from 'next'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import { Mail, Phone, MapPin } from 'lucide-react'
-import { publicApi } from '@/lib/api'
+import { getCmsContent } from '@/lib/cms'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Contact GyanSanchaar — Support & Grievances',
@@ -13,7 +15,7 @@ export const revalidate = 86400
 
 export default async function ContactPage() {
   let officer = null
-  try { officer = await publicApi.grievanceOfficer() } catch {}
+  // grievance officer loaded from site_contents
 
   return (
     <>
@@ -45,13 +47,12 @@ export default async function ContactPage() {
             <h2 className="font-bold text-heading mb-1">Grievance officer</h2>
             <p className="text-body text-xs mb-3">
               As required by IT (Intermediary Guidelines) Rules 2021 and DPDP Act 2023, we have a designated
-              Grievance Officer. You must receive an acknowledgement within {officer.ack_sla_hours} hours
-              and a resolution within {officer.resolve_sla_days} days.
+              Grievance Officer. You will receive acknowledgement within <strong>48 hours</strong> and
+              resolution within <strong>30 days</strong>.
             </p>
             <div className="text-sm space-y-1">
-              <div><strong>{officer.name}</strong></div>
-              <div><a href={`mailto:${officer.email}`} className="text-primary">{officer.email}</a></div>
-              {officer.phone && <div>{officer.phone}</div>}
+              <div><strong>Grievance Officer</strong></div>
+              <div><a href="mailto:grievance@gyansanchaar.com" className="text-primary">grievance@gyansanchaar.com</a></div>
             </div>
             <a href="/grievance" className="inline-block mt-4 text-primary text-sm font-semibold hover:underline">
               File a grievance online →

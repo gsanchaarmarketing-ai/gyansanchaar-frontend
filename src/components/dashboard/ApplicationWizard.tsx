@@ -6,7 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { studentApi, type User, type State, type Course } from '@/lib/api'
+import { updateProfile, uploadDocument } from '@/lib/student-api'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
 import { CheckCircle, GraduationCap, BookOpen, Microscope, Award } from 'lucide-react'
 
 const step2Schema = z.object({
@@ -36,13 +37,12 @@ const DOC_LABELS: Record<string,string> = {
 }
 
 interface Props {
-  user: User
-  states: State[]
-  courses: Course[]
-  token: string
+  user: any
+  states: any[]
+  courses: any[]
 }
 
-export default function ApplicationWizard({ user, states, courses, token }: Props) {
+export default function ApplicationWizard({ user, states, courses }: Props) {
   const router  = useRouter()
   const [step, setStep]           = useState(1)
   const [formData, setFormData]   = useState<Record<string, any>>({})
@@ -78,7 +78,7 @@ export default function ApplicationWizard({ user, states, courses, token }: Prop
   const handleSubmit = async () => {
     setSaving(true)
     try {
-      await studentApi.updateProfile(token, {
+      await updateProfile({
         father_name: formData.father_name,
         alt_phone:   formData.alt_phone,
         address:     formData.address,
@@ -91,7 +91,7 @@ export default function ApplicationWizard({ user, states, courses, token }: Prop
         fd.append('type', type)
         fd.append('file', file)
         if (notAvailable[type]) fd.append('document_not_available', '1')
-        await studentApi.uploadDocument(token, fd)
+        await uploadDocument(file, type)
       }
       toast.success('Profile saved! Now browse colleges and apply.')
       router.push('/colleges')

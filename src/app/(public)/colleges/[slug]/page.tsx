@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { publicApi, ApiError } from '@/lib/api'
+import { getCollegeBySlug } from '@/lib/supabase-api'
 import { getCmsContent } from '@/lib/cms'
 import { collegeSchema, breadcrumbSchema, faqSchema } from '@/lib/seo'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import CollegeDetailClient from '@/components/college/CollegeDetailClient'
+
+export const dynamic = 'force-dynamic'
 
 export const revalidate = 300
 
@@ -13,7 +15,8 @@ const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   try {
-    const { data: c } = await publicApi.college(params.slug)
+    const c = await getCollegeBySlug(params.slug)
+    if (!c) return { title: 'College | GyanSanchaar' }
     const year  = new Date().getFullYear()
     const title = `${c.name} — Admissions ${year}, Courses & Fees | GyanSanchaar`
     const desc  = [
@@ -61,10 +64,10 @@ export default async function CollegeDetailPage({ params }: { params: { slug: st
   let college: any = null
 
   try {
-    const res = await publicApi.college(params.slug)
+    const res = { data: await getCollegeBySlug(params.slug) }
     college = res.data
   } catch (err) {
-    if (err instanceof ApiError && err.status === 404) notFound()
+    notFound()
     throw err
   }
 

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { publicApi } from '@/lib/api'
+import { getExams } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function ExamsPage() {
-  const res = await publicApi.exams().catch(() => null)
+  const res = { data: await getExams().catch(() => []) }
   const exams = res?.data ?? []
 
   const jsonLd = {

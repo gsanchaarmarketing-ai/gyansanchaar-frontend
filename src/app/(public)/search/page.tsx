@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { publicApi } from '@/lib/api'
+import { search } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import Link from 'next/link'
@@ -41,17 +41,10 @@ interface TabResult {
 async function fetchAll(q: string): Promise<TabResult> {
   if (!q.trim()) return { colleges: [], courses: [], articles: [], total: 0 }
 
-  const params = { q, per_page: '6' }
-
-  const [collegesRes, coursesRes, articlesRes] = await Promise.allSettled([
-    publicApi.colleges(params),
-    publicApi.courses(params),
-    publicApi.articles(params),
-  ])
-
-  const colleges = collegesRes.status === 'fulfilled' ? collegesRes.value.data : []
-  const courses  = coursesRes.status  === 'fulfilled' ? coursesRes.value.data  : []
-  const articles = articlesRes.status === 'fulfilled' ? articlesRes.value.data : []
+  const result = await search(q)
+  const colleges = result.colleges
+  const courses  = result.courses
+  const articles = result.articles
 
   return { colleges, courses, articles, total: colleges.length + courses.length + articles.length }
 }

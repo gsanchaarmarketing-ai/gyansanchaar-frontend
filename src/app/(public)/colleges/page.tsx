@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { publicApi } from '@/lib/api'
+import { getColleges, getStates, getStreams } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import CollegeCard from '@/components/cards/CollegeCard'
@@ -40,14 +40,14 @@ export default async function CollegesPage({
   searchParams: Record<string, string>
 }) {
   const [collegesRes, statesRes, streamsRes] = await Promise.allSettled([
-    publicApi.colleges({ ...searchParams, per_page: '12' }),
-    publicApi.states(),
-    publicApi.streams(),
+    getColleges({ q: searchParams.q, state_id: searchParams.state_id ? Number(searchParams.state_id) : undefined, type: searchParams.type, limit: 12 }),
+    getStates(),
+    getStreams(),
   ])
 
   const colleges = collegesRes.status === 'fulfilled' ? collegesRes.value : null
-  const states   = statesRes.status   === 'fulfilled' ? statesRes.value.data : []
-  const streams  = streamsRes.status  === 'fulfilled' ? streamsRes.value.data : []
+  const states   = statesRes.status   === 'fulfilled' ? statesRes.value   : []
+  const streams  = streamsRes.status  === 'fulfilled' ? streamsRes.value  : []
   const apiDown  = collegesRes.status === 'rejected'
 
   return (
@@ -56,7 +56,7 @@ export default async function CollegesPage({
       <main className="max-w-7xl mx-auto px-4 py-6 pb-24 md:pb-8">
         <h1 className="text-2xl font-bold mb-1">Colleges in India</h1>
         <p className="text-slate-500 text-sm mb-6">
-          {colleges?.meta?.total?.toLocaleString() ?? colleges?.data?.length ?? '…'} colleges found
+          {colleges?.count?.toLocaleString() ?? colleges?.data?.length ?? '…'} colleges found
           {searchParams.q ? ` for "${searchParams.q}"` : ''}
         </p>
 
@@ -71,24 +71,9 @@ export default async function CollegesPage({
             {colleges && colleges.data?.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {colleges.data.map(c => <CollegeCard key={c.id} college={c} />)}
+                  {colleges.data.map((c: any) => <CollegeCard key={c.id} college={c as any} />)}
                 </div>
-                {/* Pagination */}
-                {(colleges.meta?.last_page ?? 1) > 1 && (
-                  <div className="mt-6 flex justify-center gap-2 text-sm">
-                    {Array.from({ length: colleges.meta?.last_page ?? 1 }, (_, i) => i + 1).map(p => (
-                      <a key={p}
-                        href={`/colleges?${new URLSearchParams({ ...searchParams, page: String(p) })}`}
-                        className={`px-3 py-1.5 rounded border ${
-                          p === (colleges.meta?.current_page ?? 1)
-                            ? 'bg-brand-600 text-white border-brand-600'
-                            : 'hover:bg-slate-50'
-                        }`}>
-                        {p}
-                      </a>
-                    ))}
-                  </div>
-                )}
+                {/* Pagination — TODO: implement offset-based pagination with Supabase */}
               </>
             ) : (
               <div className="py-16 text-center text-slate-500">

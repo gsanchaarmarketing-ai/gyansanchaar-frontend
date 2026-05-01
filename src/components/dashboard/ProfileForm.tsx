@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { studentApi, type User, type State } from '@/lib/api'
+import { updateProfile, sendPhoneOtp, verifyPhoneOtp } from '@/lib/student-api'
 import { useState } from 'react'
 import { CheckCircle2, ShieldAlert, MessageCircle, X } from 'lucide-react'
 
@@ -18,7 +18,7 @@ const schema = z.object({
 })
 type Form = z.infer<typeof schema>
 
-export default function ProfileForm({ user, states, token }: { user: User; states: State[]; token: string }) {
+export default function ProfileForm({ user, states }: { user: any; states: any[] }) {
   const [saving, setSaving] = useState(false)
   const [phoneVerified, setPhoneVerified] = useState(!!user.phone_verified_at)
 
@@ -34,7 +34,7 @@ export default function ProfileForm({ user, states, token }: { user: User; state
   async function onSubmit(values: Form) {
     setSaving(true)
     try {
-      await studentApi.updateProfile(token, { ...values, state_id: values.state_id ? Number(values.state_id) : undefined })
+      await updateProfile({ ...values, state_id: values.state_id ? Number(values.state_id) : undefined })
       toast.success('Profile saved')
     } catch (e: any) { toast.error(e.message) }
     finally { setSaving(false) }
@@ -96,12 +96,7 @@ function PhoneVerificationBlock({
   async function sendOtp() {
     setStage('sending')
     try {
-      await studentApi.sendOtp({
-        identifier: phone,
-        type: 'phone',
-        purpose: 'phone_verification',
-        channel: 'whatsapp',
-      })
+      await sendPhoneOtp(phone)
       toast.success('OTP sent to your WhatsApp')
       setStage('otp')
     } catch (e: any) {
@@ -114,7 +109,7 @@ function PhoneVerificationBlock({
     if (code.length !== 6) { toast.error('Enter 6-digit code'); return }
     setStage('verifying')
     try {
-      await studentApi.verifyOtp({ identifier: phone, purpose: 'phone_verification', code })
+      await verifyPhoneOtp(phone, code)
       toast.success('Phone verified!')
       onVerified()
     } catch (e: any) {

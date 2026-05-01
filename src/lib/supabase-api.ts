@@ -6,10 +6,12 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const sb = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-)
+function sb() {
+  const url  = process.env.NEXT_PUBLIC_SUPABASE_URL  ?? ''
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
+  if (!url || !anon) throw new Error('Supabase env vars not set')
+  return createClient(url, anon)
+}
 
 // ── COLLEGES ──────────────────────────────────────────────────────────────
 
@@ -67,7 +69,7 @@ export async function getColleges(params: {
   limit?: number
   offset?: number
 } = {}): Promise<{ data: CollegeListItem[]; count: number }> {
-  let q = sb
+  let q = sb()
     .from('colleges')
     .select(`
       id, name, slug, type, city, nirf_rank, naac_grade,
@@ -103,7 +105,7 @@ export async function getColleges(params: {
 }
 
 export async function getCollegeBySlug(slug: string): Promise<CollegeDetail | null> {
-  const { data, error } = await sb
+  const { data, error } = await sb()
     .from('colleges')
     .select(`
       *, states(name, slug),
@@ -146,7 +148,7 @@ export async function getCourses(params: {
   limit?: number
   offset?: number
 } = {}): Promise<{ data: any[]; count: number }> {
-  let q = sb
+  let q = sb()
     .from('courses')
     .select('id, name, slug, level, duration_months, default_fee, fee_min, fee_max, description, overview_image, streams(id, name)', { count: 'exact' })
     .eq('is_active', true)
@@ -164,7 +166,7 @@ export async function getCourses(params: {
 }
 
 export async function getCourseBySlug(slug: string): Promise<any | null> {
-  const { data: course } = await sb
+  const { data: course } = await sb()
     .from('courses')
     .select('*, streams(id, name, slug)')
     .eq('slug', slug)
@@ -174,7 +176,7 @@ export async function getCourseBySlug(slug: string): Promise<any | null> {
   if (!course) return null
 
   // Get colleges offering this course
-  const { data: cc } = await sb
+  const { data: cc } = await sb()
     .from('college_course')
     .select('fee, seats, branches, admission_process, colleges(id, name, slug, city, logo_path, ugc_verified, states(name))')
     .eq('course_id', course.id)
@@ -199,7 +201,7 @@ export async function getArticles(params: {
   limit?: number
   offset?: number
 } = {}): Promise<{ data: any[]; count: number }> {
-  let q = sb
+  let q = sb()
     .from('articles')
     .select('id, title, slug, category, excerpt, featured_image, published_at, views, reading_time', { count: 'exact' })
     .eq('status', 'published')
@@ -217,7 +219,7 @@ export async function getArticles(params: {
 }
 
 export async function getArticleBySlug(slug: string): Promise<any | null> {
-  const { data } = await sb
+  const { data } = await sb()
     .from('articles')
     .select('*')
     .eq('slug', slug)
@@ -227,7 +229,7 @@ export async function getArticleBySlug(slug: string): Promise<any | null> {
 
   if (data) {
     // Increment views asynchronously — don't block render
-    sb.from('articles').update({ views: (data.views ?? 0) + 1 }).eq('id', data.id).then(() => {})
+    sb().from('articles').update({ views: (data.views ?? 0) + 1 }).eq('id', data.id).then(() => {})
   }
   return data ?? null
 }
@@ -238,7 +240,7 @@ export async function getExams(params: {
   level?: string
   limit?: number
 } = {}): Promise<any[]> {
-  let q = sb
+  let q = sb()
     .from('exams')
     .select('*, exam_stream(streams(name))')
     .eq('is_active', true)
@@ -255,7 +257,7 @@ export async function getExams(params: {
 }
 
 export async function getExamBySlug(slug: string): Promise<any | null> {
-  const { data } = await sb
+  const { data } = await sb()
     .from('exams')
     .select('*, exam_stream(streams(name))')
     .eq('slug', slug)
@@ -267,26 +269,26 @@ export async function getExamBySlug(slug: string): Promise<any | null> {
 // ── STATES / STREAMS ───────────────────────────────────────────────────────
 
 export async function getStates(): Promise<any[]> {
-  const { data } = await sb.from('states').select('id, name, slug, region').eq('is_active', true).order('name')
+  const { data } = await sb().from('states').select('id, name, slug, region').eq('is_active', true).order('name')
   return data ?? []
 }
 
 export async function getStreams(): Promise<any[]> {
-  const { data } = await sb.from('streams').select('id, name, short, slug').eq('is_active', true).order('sort_order')
+  const { data } = await sb().from('streams').select('id, name, short, slug').eq('is_active', true).order('sort_order')
   return data ?? []
 }
 
 // ── MEDIA LOGOS ───────────────────────────────────────────────────────────
 
 export async function getMediaLogos(): Promise<any[]> {
-  const { data } = await sb.from('media_logos').select('id, name, logo_url, website_url').eq('is_active', true).order('sort_order')
+  const { data } = await sb().from('media_logos').select('id, name, logo_url, website_url').eq('is_active', true).order('sort_order')
   return data ?? []
 }
 
 // ── TEAM MEMBERS ──────────────────────────────────────────────────────────
 
 export async function getTeam(): Promise<any[]> {
-  const { data } = await sb.from('team_members').select('*').eq('is_active', true).order('sort_order')
+  const { data } = await sb().from('team_members').select('*').eq('is_active', true).order('sort_order')
   return data ?? []
 }
 
@@ -296,9 +298,9 @@ export async function search(query: string): Promise<{ colleges: any[]; courses:
   if (!query || query.length < 2) return { colleges: [], courses: [], articles: [] }
 
   const [collegesRes, coursesRes, articlesRes] = await Promise.all([
-    sb.from('colleges').select('id, name, slug, city, states(name), logo_path').eq('is_active', true).is('deleted_at', null).ilike('name', `%${query}%`).limit(5),
-    sb.from('courses').select('id, name, slug, level, streams(name)').eq('is_active', true).ilike('name', `%${query}%`).limit(5),
-    sb.from('articles').select('id, title, slug, category, excerpt').eq('status', 'published').is('deleted_at', null).ilike('title', `%${query}%`).limit(5),
+    sb().from('colleges').select('id, name, slug, city, states(name), logo_path').eq('is_active', true).is('deleted_at', null).ilike('name', `%${query}%`).limit(5),
+    sb().from('courses').select('id, name, slug, level, streams(name)').eq('is_active', true).ilike('name', `%${query}%`).limit(5),
+    sb().from('articles').select('id, title, slug, category, excerpt').eq('status', 'published').is('deleted_at', null).ilike('title', `%${query}%`).limit(5),
   ])
 
   return {

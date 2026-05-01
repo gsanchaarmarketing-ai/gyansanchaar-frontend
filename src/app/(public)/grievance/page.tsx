@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
-import { studentApi } from '@/lib/api'
+import { fileGrievance } from '@/lib/student-api'
 import Header from '@/components/layout/HeaderClient'
 import MobileNav from '@/components/layout/MobileNav'
 import { CheckCircle } from 'lucide-react'
@@ -34,7 +34,7 @@ export default function GrievancePage() {
   async function onSubmit(values: Form) {
     setLoading(true)
     try {
-      const res = await studentApi.fileGrievance(values)
+      const res = await fileGrievance(values)
       setSubmitted(res.ticket_id)
     } catch (e: any) {
       toast.error(e.message ?? 'Submission failed')

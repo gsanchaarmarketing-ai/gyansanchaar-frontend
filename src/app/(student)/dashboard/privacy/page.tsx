@@ -1,76 +1,82 @@
 import { redirect } from 'next/navigation'
-import { getToken } from '@/lib/auth'
-import { studentApi } from '@/lib/api'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
+import Link from 'next/link'
+import { ArrowLeft, Shield, Download, Trash2 } from 'lucide-react'
 import ConsentManager from '@/components/dashboard/ConsentManager'
 import ErasureButton from '@/components/dashboard/ErasureButton'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PrivacyPage() {
-  const token = await getToken()
-  if (!token) redirect('/login')
-  let me, summary
-  try {
-    [me, summary] = await Promise.all([
-      studentApi.me(token),
-      studentApi.dataSummary(token),
-    ])
-  } catch { redirect('/login') }
+  const sb = await createServerSupabaseClient()
+  const { data: { user } } = await sb.auth.getUser()
+  if (!user) redirect('/login')
+
+  const [{ data: profile }, { data: consents }, { data: docs }, { count: appCount }] = await Promise.all([
+    sb.from('profiles').select('*').eq('id', user.id).single(),
+    sb.from('consent_records').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
+    sb.from('documents').select('id', { count: 'exact' }).eq('user_id', user.id).is('deleted_at', null),
+    sb.from('applications').select('*', { count: 'exact', head: true }).eq('student_id', user.id).is('deleted_at', null),
+  ])
+
+  // Latest action per purpose
+  const consentState: Record<string, boolean> = {}
+  const seen = new Set<string>()
+  for (const r of (consents ?? [])) {
+    if (!seen.has(r.purpose)) { consentState[r.purpose] = r.action === 'granted'; seen.add(r.purpose) }
+  }
 
   return (
     <>
       <Header />
-      <main className="max-w-xl mx-auto px-4 py-6 pb-24 md:pb-10">
-        <h1 className="text-xl font-bold mb-1">Privacy & Data</h1>
-        <p className="text-slate-500 text-sm mb-6">Your rights under the Digital Personal Data Protection Act, 2023</p>
+      <main className="max-w-2xl mx-auto px-4 py-5 pb-24 md:pb-10">
+        <Link href="/dashboard" className="inline-flex items-center gap-1 text-muted text-sm mb-4">
+          <ArrowLeft className="w-3.5 h-3.5" />Back
+        </Link>
 
-        {/* Data summary — DPDP §11 right to access */}
-        <section className="bg-white border rounded-xl p-5 mb-4">
-          <h2 className="font-semibold text-sm mb-3">Data we hold about you</h2>
-          <dl className="space-y-2 text-sm">
-            {[
-              ['Applications', summary.applications_count],
-              ['Documents', summary.documents_count],
-              ['Account created', new Date(me.user.id).toLocaleDateString?.() ?? '—'],
-            ].map(([k,v])=>(
-              <div key={String(k)} className="flex justify-between">
-                <dt className="text-slate-500">{k}</dt>
-                <dd className="font-medium">{v}</dd>
-              </div>
-            ))}
-          </dl>
-          <div className="mt-3 text-xs text-slate-400">
-            Application data is retained for {summary.data_retention?.application_days} days after admission cycle closes.
-            Logs retained for {summary.data_retention?.log_days} days (CERT-In 2022 requirement).
+        <div className="flex items-center gap-2 mb-5">
+          <Shield className="w-6 h-6 text-primary" />
+          <h1 className="text-xl font-bold text-heading">Privacy & Data Settings</h1>
+        </div>
+
+        {/* Data summary */}
+        <div className="bg-white border border-border rounded-2xl p-5 mb-4">
+          <h2 className="font-bold text-heading mb-3">Your data with GyanSanchaar</h2>
+          <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="bg-primary-light rounded-xl p-3">
+              <div className="text-xl font-bold text-primary">{appCount ?? 0}</div>
+              <div className="text-xs text-muted mt-0.5">Applications</div>
+            </div>
+            <div className="bg-primary-light rounded-xl p-3">
+              <div className="text-xl font-bold text-primary">{docs?.length ?? 0}</div>
+              <div className="text-xs text-muted mt-0.5">Documents</div>
+            </div>
+            <div className="bg-primary-light rounded-xl p-3">
+              <div className="text-xl font-bold text-primary">{consents?.length ?? 0}</div>
+              <div className="text-xs text-muted mt-0.5">Consent Logs</div>
+            </div>
           </div>
-        </section>
+        </div>
 
-        {/* Consent management — DPDP §6 */}
-        <section className="bg-white border rounded-xl p-5 mb-4">
-          <h2 className="font-semibold text-sm mb-3">Consent</h2>
-          <ConsentManager initialState={me.consent_state} token={token} />
-        </section>
+        {/* Consent management */}
+        <ConsentManager initialState={consentState} />
 
-        {/* Grievance officer — IT Rules 2021 */}
-        <section className="bg-white border rounded-xl p-5 mb-4">
-          <h2 className="font-semibold text-sm mb-3">Grievance Officer</h2>
-          <p className="text-sm text-slate-600">For data-related complaints, contact:</p>
-          <div className="mt-2 text-sm space-y-1">
-            <div><span className="text-slate-500">Email: </span><a href="mailto:grievance@gyansanchaar.cloud" className="text-brand-600">grievance@gyansanchaar.cloud</a></div>
-            <div><span className="text-slate-500">Resolution SLA: </span>90 days (DPDP Rules 2025)</div>
+        {/* Erasure */}
+        <div className="bg-rose-50 border border-rose-200 rounded-2xl p-5 mt-4">
+          <div className="flex items-start gap-3">
+            <Trash2 className="w-5 h-5 text-rose-600 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-bold text-heading mb-1">Erase my data</h3>
+              <p className="text-muted text-sm mb-3">
+                Under <strong>DPDP Act 2023 §12</strong> you have the right to erasure. We'll delete all your
+                personal data within 30 days. Some data may be retained for legal compliance.
+              </p>
+              <ErasureButton />
+            </div>
           </div>
-          <a href="/grievance" className="mt-3 block text-brand-600 text-sm font-medium">File a grievance →</a>
-        </section>
-
-        {/* Erasure — DPDP §12 */}
-        <section className="bg-rose-50 border border-rose-200 rounded-xl p-5">
-          <h2 className="font-semibold text-sm text-rose-800 mb-2">Request Account Deletion</h2>
-          <p className="text-xs text-rose-700 mb-3">
-            We will send a 48-hour advance notice email, then erase your data subject to mandatory
-            retention (CERT-In 180-day logs, 3-year application records for regulatory purposes).
-          </p>
-          <ErasureButton token={token} />
-        </section>
+        </div>
       </main>
       <MobileNav />
     </>

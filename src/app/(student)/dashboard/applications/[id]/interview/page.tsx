@@ -1,141 +1,83 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import Header from '@/components/layout/HeaderClient'
-import MobileNav from '@/components/layout/MobileNav'
+import { useRouter, useParams } from 'next/navigation'
+import { scheduleInterview } from '@/lib/student-api'
+import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { toast } from 'sonner'
 import Link from 'next/link'
-import { Calendar, Clock, ArrowLeft, CheckCircle2 } from 'lucide-react'
-import { getClientToken } from '@/lib/client-auth'
-import { studentApi } from '@/lib/api'
+import Header from '@/components/layout/Header'
+import MobileNav from '@/components/layout/MobileNav'
+import { ArrowLeft, Calendar } from 'lucide-react'
 
-const SLOTS = [
-  '09:00','09:30','10:00','10:30','11:00','11:30',
-  '14:00','14:30','15:00','15:30','16:00','16:30',
-]
-
-export default function ScheduleInterviewPage() {
-  const { id } = useParams<{ id: string }>()
-  const router  = useRouter()
-  const [date,  setDate]  = useState('')
-  const [time,  setTime]  = useState('')
-  const [app,   setApp]   = useState<any>(null)
-  const [loading,  setLoading]  = useState(true)
-  const [saving,   setSaving]   = useState(false)
-  const [success,  setSuccess]  = useState(false)
+export default function InterviewPage() {
+  const router = useRouter()
+  const params = useParams<{ id: string }>()
+  const sb = createBrowserSupabaseClient()
+  const [app, setApp] = useState<any>(null)
+  const [date, setDate] = useState('')
+  const [time, setTime] = useState('10:00')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    getClientToken().then(async token => {
-      if (!token) { router.push('/login'); return }
-      try {
-        const res = await studentApi.application(token, Number(id))
-        setApp(res.data)
-      } catch { router.push('/dashboard/applications') }
-      finally { setLoading(false) }
-    })
-  }, [id, router])
+    sb.from('applications')
+      .select('id, status, interview_at, colleges(name), courses(name)')
+      .eq('id', Number(params.id))
+      .single()
+      .then(({ data }) => setApp(data))
+  }, [params.id])
 
-  async function schedule() {
-    if (!date || !time) { alert('Please select both date and time.'); return }
+  async function submit() {
+    if (!date || !time) { toast.error('Pick date and time'); return }
     setSaving(true)
     try {
-      const token = await getClientToken()
-      if (!token) { router.push('/login'); return }
-      await studentApi.scheduleInterview(token, Number(id), `${date}T${time}:00`)
-      setSuccess(true)
-      setTimeout(() => router.push('/dashboard'), 2000)
+      const iso = new Date(`${date}T${time}:00`).toISOString()
+      await scheduleInterview(Number(params.id), iso)
+      toast.success('Interview scheduled!')
+      router.push(`/dashboard/applications/${params.id}`)
     } catch (e: any) {
-      alert(e?.message ?? 'Failed to schedule. Please try again.')
-    } finally {
-      setSaving(false)
-    }
+      toast.error(e.message)
+    } finally { setSaving(false) }
   }
 
-  const minDate = new Date()
-  minDate.setDate(minDate.getDate() + 1)
-  const minDateStr = minDate.toISOString().split('T')[0]
+  if (!app) return <><Header /><main className="max-w-md mx-auto px-4 py-10 text-center text-muted">Loading…</main></>
+
+  const inp = 'w-full border border-border rounded-lg px-3 py-2.5 text-sm focus:ring-2 focus:ring-primary outline-none'
 
   return (
     <>
       <Header />
-      <main className="max-w-xl mx-auto px-4 py-6 pb-28">
-        <Link href="/dashboard" className="flex items-center gap-1.5 text-muted text-sm mb-6">
-          <ArrowLeft className="w-4 h-4" /> Dashboard
+      <main className="max-w-md mx-auto px-4 py-5 pb-24">
+        <Link href={`/dashboard/applications/${params.id}`} className="inline-flex items-center gap-1 text-muted text-sm mb-4">
+          <ArrowLeft className="w-3.5 h-3.5" />Back
         </Link>
 
-        <h1 className="text-xl font-bold text-heading mb-1">Schedule Personal Interview</h1>
-        {app && (
-          <p className="text-muted text-sm mb-6">
-            {app.college?.name} — {app.course?.name}
+        <div className="bg-white border border-border rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Calendar className="w-5 h-5 text-primary" />
+            <h1 className="text-lg font-bold text-heading">Schedule Interview</h1>
+          </div>
+
+          <p className="text-muted text-sm mb-5">
+            <strong>{app.colleges?.name}</strong> · {app.courses?.name}
           </p>
-        )}
 
-        {loading ? (
-          <div className="bg-white border border-border rounded-2xl p-8 text-center">
-            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          </div>
-        ) : success ? (
-          <div className="bg-white border border-emerald-200 rounded-2xl p-8 text-center">
-            <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-            <h2 className="font-bold text-heading mb-1">Interview Scheduled!</h2>
-            <p className="text-muted text-sm">
-              {new Date(`${date}T${time}`).toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} at {time} IST
-            </p>
-            <p className="text-xs text-muted mt-3">You will receive a WhatsApp confirmation shortly. Redirecting…</p>
-          </div>
-        ) : (
-          <div className="bg-white border border-border rounded-2xl p-5 space-y-5">
+          <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">
-                <Calendar className="w-4 h-4 inline mr-1.5 text-primary" />
-                Select Date <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="date"
-                value={date}
-                min={minDateStr}
-                onChange={e => setDate(e.target.value)}
-                className="w-full border border-border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-primary"
-              />
+              <label className="block text-sm font-medium mb-1.5">Preferred Date</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)}
+                min={new Date(Date.now() + 86400000).toISOString().split('T')[0]} className={inp} />
             </div>
-
             <div>
-              <label className="block text-sm font-medium mb-2">
-                <Clock className="w-4 h-4 inline mr-1.5 text-primary" />
-                Select Time (IST) <span className="text-rose-500">*</span>
-              </label>
-              <div className="grid grid-cols-4 gap-2">
-                {SLOTS.map(t => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setTime(t)}
-                    className={`py-2 rounded-xl text-xs font-medium border transition-all ${
-                      time === t
-                        ? 'bg-primary text-white border-primary'
-                        : 'border-border hover:border-primary text-body'
-                    }`}
-                  >
-                    {t}
-                  </button>
-                ))}
-              </div>
+              <label className="block text-sm font-medium mb-1.5">Preferred Time</label>
+              <input type="time" value={time} onChange={e => setTime(e.target.value)} className={inp} />
             </div>
-
-            <div className="bg-primary-light rounded-xl p-4 text-xs text-body">
-              <strong className="text-heading">Important:</strong> The college will confirm your interview slot via WhatsApp.
-              Please ensure your phone number is verified in your profile.
-            </div>
-
-            <button
-              onClick={schedule}
-              disabled={saving || !date || !time}
-              className="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm disabled:opacity-50 hover:bg-primary-hover transition-colors"
-            >
-              {saving ? 'Scheduling…' : 'Confirm Interview →'}
+            <button onClick={submit} disabled={saving}
+              className="w-full bg-primary text-white py-2.5 rounded-lg font-semibold text-sm disabled:opacity-60">
+              {saving ? 'Scheduling…' : 'Schedule Interview'}
             </button>
           </div>
-        )}
+        </div>
       </main>
       <MobileNav />
     </>
