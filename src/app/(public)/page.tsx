@@ -81,11 +81,6 @@ const STREAMS = [
 /* ─── Page ─────────────────────────────────────────────────────────── */
 
 export default async function HomePage() {
-  const { createServerSupabaseClient } = await import('@/lib/supabase-server')
-  const sb = await createServerSupabaseClient()
-  const { data: { user } } = await sb.auth.getUser()
-  const isLoggedIn = !!user
-
   const [articlesRes, collegesRes, mediaLogosRes] = await Promise.allSettled([
     getArticles({ limit: 4 }),
     getColleges({ featured: true, limit: 6 }),
