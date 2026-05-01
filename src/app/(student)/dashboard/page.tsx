@@ -6,186 +6,210 @@ import FirstVisitModal from '@/components/dashboard/FirstVisitModal'
 import Link from 'next/link'
 import {
   ArrowRight, FileText, Building2, CheckCircle2,
-  Clock, AlertCircle, Calendar, Download, MessageCircle,
-  Bell, User, Shield, Sparkles
+  AlertCircle, Calendar, Download, Bell, User, Shield, Sparkles
 } from 'lucide-react'
-import { statusColor, statusLabel } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
+
+const STATUS_COLOR: Record<string,string> = {
+  applied:             'bg-blue-100 text-blue-800',
+  approved:            'bg-emerald-100 text-emerald-800',
+  interview_scheduled: 'bg-violet-100 text-violet-800',
+  admitted:            'bg-green-100 text-green-800',
+  rejected:            'bg-rose-100 text-rose-800',
+  withdrawn:           'bg-slate-100 text-slate-600',
+}
+const STATUS_LABEL: Record<string,string> = {
+  applied:             'Applied',
+  approved:            'Approved ✓',
+  interview_scheduled: 'Interview Scheduled',
+  admitted:            'Admitted 🎉',
+  rejected:            'Not Selected',
+  withdrawn:           'Withdrawn',
+}
 
 export default async function DashboardPage() {
   const sb = await createServerSupabaseClient()
   const { data: { user } } = await sb.auth.getUser()
   if (!user) redirect('/login')
 
-  // Load profile + applications in parallel
   const [profileRes, appsRes] = await Promise.all([
     sb.from('profiles').select('*').eq('id', user.id).single(),
-    sb.from('applications').select(`
-      id, status, branch, interview_at, admission_letter_path, created_at,
-      colleges(id, name, slug, city),
-      courses(id, name, level)
-    `).eq('student_id', user.id).is('deleted_at', null).order('created_at', { ascending: false }),
+    sb.from('applications')
+      .select('id, status, branch, interview_at, admission_letter_path, created_at, updated_at, college_id, course_id, colleges(id,name,slug,city), courses(id,name,level)')
+      .eq('student_id', user.id)
+      .is('deleted_at', null)
+      .order('updated_at', { ascending: false }),
   ])
 
-  const profile         = profileRes.data
-  const applicationList = appsRes.data ?? []
+  const profile = profileRes.data
+  const apps    = appsRes.data ?? []
 
   if (!profile) redirect('/login')
 
-  const profileComplete =
-    !!profile.father_name &&
-    !!profile.address &&
-    !!profile.phone_verified_at &&
-    (!profile.is_minor || profile.parental_consent_verified)
+  // Profile complete = has father_name + address (phone_verify optional until WhatsApp live)
+  const profileComplete = !!(profile.father_name && profile.address)
+  const isMinorPending  = profile.is_minor && !profile.parental_consent_verified
 
   return (
     <>
       <Header />
       <FirstVisitModal profileComplete={profileComplete} />
-      <main className="max-w-3xl mx-auto px-4 py-5 pb-28 md:pb-10">
+
+      <main className="max-w-2xl mx-auto px-4 py-5 pb-28 md:pb-10">
 
         {/* Greeting */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-extrabold text-heading">
+            <h1 className="text-xl font-extrabold text-slate-800">
               Hello, {profile.name.split(' ')[0]} 👋
             </h1>
-            <p className="text-muted text-xs mt-0.5">{profile.phone ? `+91 ${profile.phone}` : user.email}</p>
+            <p className="text-slate-500 text-xs mt-0.5">{user.email}</p>
           </div>
           <Link href="/dashboard/profile"
-            className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center text-primary font-bold text-sm border border-border">
+            className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm border border-blue-200 hover:bg-blue-200 transition-colors">
             {profile.name.charAt(0).toUpperCase()}
           </Link>
         </div>
 
-        {/* Profile incomplete */}
-        {!profileComplete && !profile.is_minor && (
-          <div className="bg-gradient-to-br from-primary to-blue-700 rounded-2xl p-5 mb-5 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
-            <div className="flex items-start gap-3 relative">
+        {/* ── MINOR ALERT ─────────────────────────────────────────────── */}
+        {isMinorPending && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-500 mt-0.5 shrink-0" />
+              <div>
+                <div className="font-bold text-slate-800 text-sm">Parent consent required</div>
+                <div className="text-slate-600 text-xs mt-1 mb-3">
+                  You're under 18. DPDP Act 2023 §9 requires parent consent before applying.
+                </div>
+                <Link href="/dashboard/parental-consent"
+                  className="inline-flex items-center gap-1.5 bg-amber-500 text-white font-semibold px-4 py-2 rounded-xl text-xs">
+                  Get parent consent <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── PROFILE INCOMPLETE BANNER ────────────────────────────────── */}
+        {!profileComplete && (
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 mb-5 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-28 h-28 bg-white/5 rounded-full -translate-y-8 translate-x-8" />
+            <div className="relative flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
                 <Sparkles className="w-5 h-5" />
               </div>
               <div className="flex-1">
                 <div className="font-bold text-sm mb-0.5">Complete your application profile</div>
                 <div className="text-white/70 text-xs leading-relaxed mb-4">
-                  Fill it once — use it to apply to any college with one tap. Takes under 5 minutes.
+                  Fill it once — apply to any college with one tap. Father's name, address, course, and marksheets.
                 </div>
                 <Link href="/dashboard/application"
-                  className="inline-flex items-center gap-2 bg-white text-primary font-bold px-5 py-2.5 rounded-xl text-sm">
-                  Start Profile <ArrowRight className="w-3.5 h-3.5" />
+                  className="inline-flex items-center gap-2 bg-white text-blue-700 font-bold px-5 py-2.5 rounded-xl text-sm">
+                  Start Now <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
           </div>
         )}
 
-        {/* Minor — parental consent */}
-        {profile.is_minor && !profile.parental_consent_verified && (
-          <div className="bg-warning/10 border border-warning/30 rounded-2xl p-5 mb-5">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-warning mt-0.5 shrink-0" />
+        {/* ── PROFILE COMPLETE + NO APPS ──────────────────────────────── */}
+        {profileComplete && apps.length === 0 && (
+          <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 mb-5">
+            <div className="flex items-center gap-3 mb-3">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500 shrink-0" />
               <div>
-                <div className="font-bold text-heading text-sm mb-0.5">Parent consent required</div>
-                <div className="text-body text-xs mb-3">
-                  You're under 18. DPDP Act 2023 §9 requires parent consent before applying.
-                </div>
-                <Link href="/dashboard/parental-consent"
-                  className="inline-flex items-center gap-2 bg-warning text-white font-semibold px-4 py-2 rounded-xl text-xs">
-                  Verify parent consent <ArrowRight className="w-3 h-3" />
-                </Link>
+                <div className="font-bold text-slate-800 text-sm">Profile ready! Start applying</div>
+                <div className="text-slate-500 text-xs mt-0.5">Browse colleges and apply free with one tap.</div>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Profile complete — browse CTA */}
-        {profileComplete && applicationList.length === 0 && (
-          <div className="bg-success/10 border border-success/30 rounded-2xl p-5 mb-5">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-8 h-8 text-success shrink-0" />
-              <div>
-                <div className="font-bold text-heading text-sm">Profile complete! Start applying</div>
-                <div className="text-body text-xs mt-0.5">Browse colleges and apply with one tap.</div>
-              </div>
-            </div>
-            <Link href="/colleges" className="flex items-center justify-between mt-4 bg-primary text-white px-4 py-3 rounded-xl font-semibold text-sm">
-              Browse Colleges & Apply <ArrowRight className="w-4 h-4" />
+            <Link href="/colleges"
+              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-bold text-sm transition-colors">
+              <Building2 className="w-4 h-4" />Browse Colleges & Apply
             </Link>
           </div>
         )}
 
-        {/* Applications */}
-        {applicationList.length > 0 && (
+        {/* ── APPLICATIONS ─────────────────────────────────────────────── */}
+        {apps.length > 0 && (
           <section className="mb-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-bold text-heading">My Applications</h2>
-              <Link href="/dashboard/applications" className="text-primary text-xs font-semibold">View all →</Link>
+              <h2 className="font-bold text-slate-800">My Applications ({apps.length})</h2>
+              <Link href="/dashboard/applications" className="text-blue-600 text-xs font-semibold">View all →</Link>
             </div>
             <div className="space-y-3">
-              {applicationList.map((app: any) => (
-                <div key={app.id} className="bg-white border border-border rounded-2xl p-4">
+              {apps.map((app: any) => (
+                <div key={app.id} className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-heading text-sm line-clamp-1">{app.colleges?.name}</div>
-                      <div className="text-muted text-xs mt-0.5">{app.courses?.name} · {app.branch ?? app.courses?.level?.toUpperCase()}</div>
+                      <div className="font-semibold text-slate-800 text-sm line-clamp-1">
+                        {app.colleges?.name ?? 'College'}
+                      </div>
+                      <div className="text-slate-500 text-xs mt-0.5">
+                        {app.courses?.name ?? 'Course'}
+                        {app.branch ? ` · ${app.branch}` : ''}
+                        {app.colleges?.city ? ` · ${app.colleges.city}` : ''}
+                      </div>
                     </div>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-bold shrink-0 ${statusColor(app.status)}`}>
-                      {statusLabel(app.status)}
+                    <span className={`text-[11px] font-semibold px-2.5 py-1 rounded-full shrink-0 ${STATUS_COLOR[app.status] ?? 'bg-slate-100 text-slate-600'}`}>
+                      {STATUS_LABEL[app.status] ?? app.status}
                     </span>
                   </div>
+
+                  {/* Action buttons per status */}
                   <div className="flex flex-wrap gap-2">
                     {app.admission_letter_path && (
                       <a href={app.admission_letter_path} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 bg-success/10 text-success px-3 py-1.5 rounded-lg text-xs font-semibold">
-                        <Download className="w-3.5 h-3.5" /> Download Admission Letter
+                        className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-emerald-100 transition-colors">
+                        <Download className="w-3.5 h-3.5" />Download Admission Letter
                       </a>
                     )}
                     {app.status === 'approved' && !app.interview_at && (
                       <Link href={`/dashboard/applications/${app.id}/interview`}
-                        className="flex items-center gap-1.5 bg-primary text-white px-3 py-1.5 rounded-lg text-xs font-semibold">
-                        <Calendar className="w-3.5 h-3.5" /> Schedule Interview
+                        className="flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold hover:bg-blue-700 transition-colors">
+                        <Calendar className="w-3.5 h-3.5" />Schedule Interview
                       </Link>
                     )}
                     {app.interview_at && (
-                      <div className="flex items-center gap-1.5 bg-primary-light text-primary px-3 py-1.5 rounded-lg text-xs font-semibold">
+                      <div className="flex items-center gap-1.5 bg-violet-50 border border-violet-200 text-violet-700 px-3 py-1.5 rounded-xl text-xs font-semibold">
                         <Calendar className="w-3.5 h-3.5" />
-                        Interview: {new Date(app.interview_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        Interview: {new Date(app.interview_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}
                       </div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
+
             {profileComplete && (
-              <Link href="/colleges" className="flex items-center justify-between mt-4 border border-primary text-primary px-4 py-3 rounded-xl font-semibold text-sm">
+              <Link href="/colleges"
+                className="flex items-center justify-between mt-3 border border-blue-300 text-blue-600 px-4 py-3 rounded-xl font-semibold text-sm hover:bg-blue-50 transition-colors">
                 Apply to more colleges <ArrowRight className="w-4 h-4" />
               </Link>
             )}
           </section>
         )}
 
-        {/* Quick links */}
+        {/* ── QUICK LINKS ──────────────────────────────────────────────── */}
         <section>
-          <h2 className="font-bold text-heading mb-3">Quick Links</h2>
+          <h2 className="font-bold text-slate-800 mb-3">Quick Links</h2>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { href: '/dashboard/notifications', icon: Bell,          label: 'Notifications',  sub: 'Application updates' },
-              { href: '/dashboard/counselling',   icon: MessageCircle, label: 'Counselling',    sub: 'Book college sessions' },
-              { href: '/dashboard/application',   icon: User,          label: 'My Profile',     sub: 'Edit details & documents' },
-              { href: '/dashboard/documents',     icon: FileText,      label: 'Documents',      sub: 'Marksheets & certificates' },
-              { href: '/dashboard/privacy',       icon: Shield,        label: 'Privacy',        sub: 'Data & consent settings' },
+              { href: '/dashboard/notifications', icon: Bell,          label: 'Notifications',       sub: 'Application updates'    },
+              { href: '/dashboard/application',   icon: User,          label: 'My Profile',          sub: 'Edit details & docs'    },
+              { href: '/dashboard/documents',     icon: FileText,      label: 'Documents',           sub: 'Marksheets uploaded'    },
+              { href: '/dashboard/privacy',       icon: Shield,        label: 'Privacy & Consent',   sub: 'DPDP Act 2023'          },
             ].map(({ href, icon: Icon, label, sub }) => (
               <Link key={href} href={href}
-                className="bg-white border border-border rounded-2xl p-4 hover:border-primary transition-colors">
-                <Icon className="w-5 h-5 text-primary mb-2" />
-                <div className="font-semibold text-heading text-sm">{label}</div>
-                <div className="text-muted text-xs mt-0.5">{sub}</div>
+                className="bg-white border border-slate-200 rounded-2xl p-4 hover:border-blue-300 hover:shadow-sm transition-all">
+                <Icon className="w-5 h-5 text-blue-600 mb-2" />
+                <div className="font-semibold text-slate-800 text-sm">{label}</div>
+                <div className="text-slate-400 text-xs mt-0.5">{sub}</div>
               </Link>
             ))}
           </div>
         </section>
+
       </main>
       <MobileNav />
     </>
