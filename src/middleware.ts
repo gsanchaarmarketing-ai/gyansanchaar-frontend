@@ -55,12 +55,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  // Fetch role when we have a user and need routing decisions
+  let userRole: string | null = null
+  if (user && (needsStudentAuth || isAuthPage)) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+      userRole = profile?.role ?? null
+    } catch {
+      userRole = null
+    }
+  }
+
+  const isStudent = userRole === 'student'
+  const isAdmin   = userRole !== null && userRole !== 'student'
+
   // Student dashboard protection
-  if (needsStudentAuth && !user) {
-    const url = request.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('redirect', pathname)
-    return NextResponse.redirect(url)
+  if (needsStudentAuth) {
+    if (!user || !isStudent) {
+      if (isAdmin) {
+        return NextResponse.redirect(new URL('/admin', request.url))
+      }
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
+    }
   }
 
   // Admin protection
@@ -68,9 +91,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/admin/login', request.url))
   }
 
-  // Redirect logged-in users away from auth pages
+  // Redirect logged-in users away from student auth pages
   if (isAuthPage && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    if (isAdmin)   return NextResponse.redirect(new URL('/admin', request.url))
+    if (isStudent) return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return supabaseResponse
