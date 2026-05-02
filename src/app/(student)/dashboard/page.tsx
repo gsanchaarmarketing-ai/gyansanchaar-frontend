@@ -3,6 +3,7 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import FirstVisitModal from '@/components/dashboard/FirstVisitModal'
+import SignOutButton from '@/components/dashboard/SignOutButton'
 import Link from 'next/link'
 import {
   ArrowRight, FileText, Building2, CheckCircle2,
@@ -65,6 +66,9 @@ export default async function DashboardPage() {
               Hello, {profile.name.split(' ')[0]} 👋
             </h1>
             <p className="text-slate-500 text-xs mt-0.5">{user.email}</p>
+            <div className="mt-1.5">
+              <SignOutButton />
+            </div>
           </div>
           <Link href="/dashboard/profile"
             className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-sm border border-blue-200 hover:bg-blue-200 transition-colors">
