@@ -18,9 +18,6 @@ export default function CollegeCard({ college }: { college: any }) {
     : null
 
   const p = college.placement_data
-  const views = college.views && college.views > 0
-    ? college.views
-    : Math.floor((college.id ?? 1) * 211 + 3800)
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg hover:border-blue-300 transition-all duration-200 flex flex-col group">
