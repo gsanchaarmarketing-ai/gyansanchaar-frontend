@@ -146,19 +146,6 @@ export default function CollegeCard({ college }: { college: any }) {
           </div>
         )}
 
-        {/* Shortlisted by */}
-        <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-1.5 mb-3">
-          <div className="flex -space-x-1.5">
-            {[0,1,2].map(i => (
-              <div key={i} className={`w-5 h-5 rounded-full border-2 border-white ${
-                ['bg-blue-400','bg-indigo-500','bg-violet-500'][i]
-              }`} />
-            ))}
-          </div>
-          <span className="text-[11px] text-indigo-700">
-            Shortlisted by <strong>{views.toLocaleString('en-IN')}+</strong> students
-          </span>
-        </div>
 
         <div className="flex-1" />
 
