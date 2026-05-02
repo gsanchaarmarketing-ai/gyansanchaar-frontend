@@ -1,20 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { GraduationCap, Eye, EyeOff, Shield, CheckCircle2 } from 'lucide-react'
+import { GraduationCap, Mail, ArrowLeft, Shield, CheckCircle2 } from 'lucide-react'
 import { createBrowserSupabaseClient } from '@/lib/supabase'
-import { toast } from 'sonner'
+
+type Step = 'form' | 'otp'
 
 export default function RegisterPage() {
-  const router = useRouter()
+  const [step,    setStep]    = useState<Step>('form')
   const [loading, setLoading] = useState(false)
-  const [showPwd, setShowPwd] = useState(false)
-  const [err,     setErr]     = useState<Record<string,string>>({})
+  const [err,     setErr]     = useState<Record<string, string>>({})
+  const [otp,     setOtp]     = useState(['', '', '', '', '', ''])
+  const [otpErr,  setOtpErr]  = useState('')
+  const [sentAt,  setSentAt]  = useState(0)
+
   const [form, setForm] = useState({
-    name: '', email: '', phone: '', password: '', confirm: '', dob: ''
+    name: '', email: '', phone: '', dob: ''
   })
+
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
   function f(k: string) {
     return (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,78 +29,116 @@ export default function RegisterPage() {
   }
 
   function validate() {
-    const e: Record<string,string> = {}
-    if (form.name.length < 2)         e.name     = 'Min 2 characters'
-    if (!/\S+@\S+\.\S+/.test(form.email)) e.email = 'Invalid email'
-    if (!/^\d{10}$/.test(form.phone.replace(/\D/g,''))) e.phone = '10-digit number required'
-    if (form.password.length < 8)     e.password = 'Min 8 characters'
-    if (form.password !== form.confirm) e.confirm = 'Passwords do not match'
+    const e: Record<string, string> = {}
+    if (form.name.trim().length < 2)             e.name  = 'Min 2 characters'
+    if (!/\S+@\S+\.\S+/.test(form.email))        e.email = 'Invalid email'
+    if (!/^\d{10}$/.test(form.phone.replace(/\D/g, ''))) e.phone = '10-digit number required'
     setErr(e)
     return Object.keys(e).length === 0
   }
 
-  async function submit(ev: React.FormEvent) {
-    ev.preventDefault()
+  /* ── Step 1: send OTP ───────────────────────────────────────────── */
+  async function sendOtp(e?: React.FormEvent) {
+    e?.preventDefault()
     if (!validate()) return
     setLoading(true)
+    try {
+      const { error: authErr } = await createBrowserSupabaseClient()
+        .auth.signInWithOtp({
+          email: form.email,
+          options: {
+            shouldCreateUser: true,
+            data: { name: form.name },
+          },
+        })
+      if (authErr) throw authErr
+      setSentAt(Date.now())
+      setStep('otp')
+      setTimeout(() => inputRefs.current[0]?.focus(), 100)
+    } catch (e: any) {
+      const msg = e.message ?? ''
+      if (msg.includes('already registered')) {
+        setErr({ email: 'This email is already registered. Please log in.' })
+      } else {
+        setErr({ email: msg || 'Failed to send OTP. Please try again.' })
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
+  /* ── Step 2: verify OTP + update profile ────────────────────────── */
+  async function verifyOtp(token: string) {
+    setOtpErr('')
+    setLoading(true)
     try {
       const sb = createBrowserSupabaseClient()
-      const phone = form.phone.replace(/\D/g, '').slice(-10)
 
-      // Sign up — email confirm OFF, so user is immediately logged in
-      const { data, error } = await sb.auth.signUp({
-        email:    form.email,
-        password: form.password,
-        options:  { data: { name: form.name } },
+      const { data, error: verifyErr } = await sb.auth.verifyOtp({
+        email: form.email, token, type: 'email',
       })
-      if (error) throw error
+      if (verifyErr) throw verifyErr
 
       const uid = data.user?.id
-      if (!uid) throw new Error('Registration failed. Please try again.')
+      if (!uid) throw new Error('Verification failed')
 
-      // Update profile with name and phone
+      const phone   = form.phone.replace(/\D/g, '').slice(-10)
       const isMinor = form.dob
         ? (new Date().getFullYear() - new Date(form.dob).getFullYear()) < 18
         : false
 
       await sb.from('profiles').update({
-        name: form.name,
+        name:           form.name,
         phone,
         dob:            form.dob || null,
         is_minor:       isMinor,
         consent_at:     new Date().toISOString(),
         policy_version: '1.0',
+        role:           'student',
       }).eq('id', uid)
 
-      // Seed consent records
       await sb.from('consent_records').insert([
         { user_id: uid, purpose: 'application',   action: 'granted',   policy_version: '1.0', source: 'registration' },
         { user_id: uid, purpose: 'communication', action: 'granted',   policy_version: '1.0', source: 'registration' },
         { user_id: uid, purpose: 'marketing',     action: 'withdrawn', policy_version: '1.0', source: 'registration' },
       ])
 
-      toast.success(`Welcome ${form.name}! Complete your profile to start applying.`)
-
-      // Go directly to dashboard — email confirmation is OFF in Supabase
       window.location.href = '/dashboard'
-    } catch (e: any) {
-      const msg = e.message ?? 'Registration failed'
-      if (msg.includes('already registered') || msg.includes('already been registered')) {
-        setErr({ email: 'This email is already registered. Please log in.' })
-      } else {
-        toast.error(msg)
-      }
+    } catch {
+      setOtpErr('Invalid or expired OTP. Please try again.')
+      setOtp(['', '', '', '', '', ''])
+      setTimeout(() => inputRefs.current[0]?.focus(), 50)
+    } finally {
       setLoading(false)
     }
   }
 
+  function handleOtpChange(idx: number, val: string) {
+    if (!/^\d*$/.test(val)) return
+    const next = [...otp]
+    next[idx] = val.slice(-1)
+    setOtp(next)
+    setOtpErr('')
+    if (val && idx < 5) inputRefs.current[idx + 1]?.focus()
+    if (next.every(d => d !== '')) verifyOtp(next.join(''))
+  }
+
+  function handleOtpKey(idx: number, e: React.KeyboardEvent) {
+    if (e.key === 'Backspace' && !otp[idx] && idx > 0) inputRefs.current[idx - 1]?.focus()
+  }
+
+  function handleOtpPaste(e: React.ClipboardEvent) {
+    e.preventDefault()
+    const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (digits.length === 6) { setOtp(digits.split('')); verifyOtp(digits) }
+  }
+
+  const canResend = sentAt === 0 || Date.now() - sentAt > 30_000
   const inp = (hasErr: boolean) =>
     `w-full border ${hasErr ? 'border-rose-400 bg-rose-50' : 'border-slate-200'} rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-colors`
 
   return (
     <div className="w-full max-w-md mx-auto md:mx-0 md:ml-auto">
-      {/* Header */}
       <div className="text-center md:text-left mb-6">
         <Link href="/" className="md:hidden inline-flex items-center gap-2 text-white text-xl font-bold mb-4">
           <GraduationCap className="w-6 h-6" />GyanSanchaar
@@ -105,97 +148,105 @@ export default function RegisterPage() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-2xl p-6">
-        <form onSubmit={submit} className="space-y-4" noValidate>
 
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Full Name <span className="text-rose-500">*</span>
-            </label>
-            <input value={form.name} onChange={f('name')} className={inp(!!err.name)}
-              placeholder="As on marksheet" />
-            {err.name && <p className="text-rose-600 text-xs mt-1">{err.name}</p>}
-          </div>
+        {/* ── Step 1: Registration form ── */}
+        {step === 'form' && (
+          <form onSubmit={sendOtp} className="space-y-4" noValidate>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name <span className="text-rose-500">*</span></label>
+              <input value={form.name} onChange={f('name')} className={inp(!!err.name)} placeholder="As on marksheet" />
+              {err.name && <p className="text-rose-600 text-xs mt-1">{err.name}</p>}
+            </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Email ID <span className="text-rose-500">*</span>
-            </label>
-            <input type="email" value={form.email} onChange={f('email')} className={inp(!!err.email)}
-              placeholder="you@email.com" />
-            {err.email && <p className="text-rose-600 text-xs mt-1">{err.email}</p>}
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Email ID <span className="text-rose-500">*</span></label>
+              <input type="email" value={form.email} onChange={f('email')} className={inp(!!err.email)} placeholder="you@email.com" />
+              {err.email && <p className="text-rose-600 text-xs mt-1">{err.email}</p>}
+            </div>
 
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              WhatsApp Phone Number <span className="text-rose-500">*</span>
-            </label>
-            <div className="flex gap-2">
-              <div className="flex items-center px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-500 shrink-0">
-                🇮🇳 +91
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">WhatsApp Phone Number <span className="text-rose-500">*</span></label>
+              <div className="flex gap-2">
+                <div className="flex items-center px-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-500 shrink-0">🇮🇳 +91</div>
+                <input type="tel" value={form.phone} onChange={f('phone')} className={inp(!!err.phone) + ' flex-1'}
+                  placeholder="10-digit number" maxLength={10} inputMode="numeric" />
               </div>
-              <input type="tel" value={form.phone} onChange={f('phone')} className={inp(!!err.phone)+' flex-1'}
-                placeholder="10-digit number" maxLength={10} inputMode="numeric" />
+              {err.phone && <p className="text-rose-600 text-xs mt-1">{err.phone}</p>}
+              <p className="text-xs text-slate-400 mt-1">You'll receive application updates on WhatsApp</p>
             </div>
-            {err.phone && <p className="text-rose-600 text-xs mt-1">{err.phone}</p>}
-            <p className="text-xs text-slate-400 mt-1">You'll receive application updates on WhatsApp</p>
-          </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Password <span className="text-rose-500">*</span>
-            </label>
-            <div className="relative">
-              <input type={showPwd ? 'text' : 'password'} value={form.password} onChange={f('password')}
-                className={inp(!!err.password)+' pr-11'} placeholder="Min 8 characters" />
-              <button type="button" onClick={() => setShowPwd(!showPwd)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                Date of Birth <span className="text-slate-400 font-normal">(optional)</span>
+              </label>
+              <input type="date" value={form.dob} onChange={f('dob')} className={inp(false)}
+                max={new Date().toISOString().split('T')[0]} />
             </div>
-            {err.password && <p className="text-rose-600 text-xs mt-1">{err.password}</p>}
-          </div>
 
-          {/* Confirm */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Confirm Password <span className="text-rose-500">*</span>
-            </label>
-            <input type="password" value={form.confirm} onChange={f('confirm')}
-              className={inp(!!err.confirm)} placeholder="Repeat password" />
-            {err.confirm && <p className="text-rose-600 text-xs mt-1">{err.confirm}</p>}
-          </div>
+            <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl p-3">
+              <Shield className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+              <p className="text-xs text-slate-600 leading-relaxed">
+                By signing up, you agree to our{' '}
+                <Link href="/privacy" className="text-blue-600 underline">Privacy Policy</Link> and{' '}
+                <Link href="/terms" className="text-blue-600 underline">Terms</Link>.
+                Your data is protected under the <strong>DPDP Act 2023</strong>. We never sell your data.
+              </p>
+            </div>
 
-          {/* DOB — optional */}
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">
-              Date of Birth <span className="text-slate-400 font-normal">(optional)</span>
-            </label>
-            <input type="date" value={form.dob} onChange={f('dob')} className={inp(false)}
-              max={new Date().toISOString().split('T')[0]} />
-          </div>
+            <button type="submit" disabled={loading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+              {loading
+                ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Sending OTP…</>
+                : 'Send OTP to Email →'}
+            </button>
+          </form>
+        )}
 
-          {/* DPDP consent */}
-          <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-100 rounded-xl p-3">
-            <Shield className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-slate-600 leading-relaxed">
-              By signing up, you agree to our{' '}
-              <Link href="/privacy" className="text-blue-600 underline">Privacy Policy</Link> and{' '}
-              <Link href="/terms" className="text-blue-600 underline">Terms</Link>.
-              Your data is protected under the <strong>DPDP Act 2023</strong>. We never sell your data.
-            </p>
-          </div>
+        {/* ── Step 2: OTP verify ── */}
+        {step === 'otp' && (
+          <div className="space-y-5">
+            <button onClick={() => { setStep('form'); setOtp(['','','','','','']); setOtpErr('') }}
+              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 transition-colors">
+              <ArrowLeft className="w-3.5 h-3.5" /> Back
+            </button>
 
-          <button type="submit" disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold text-sm transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
-            {loading
-              ? <><div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Creating account…</>
-              : 'Create Free Account →'}
-          </button>
-        </form>
+            <div className="flex items-center gap-2 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
+              <Mail className="w-4 h-4 text-blue-500 shrink-0" />
+              <p className="text-sm text-blue-800">OTP sent to <strong className="break-all">{form.email}</strong></p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-3 text-center">Enter 6-digit OTP</label>
+              <div className="flex gap-2 justify-center" onPaste={handleOtpPaste}>
+                {otp.map((digit, i) => (
+                  <input key={i}
+                    ref={el => { inputRefs.current[i] = el }}
+                    type="text" inputMode="numeric" maxLength={1} value={digit}
+                    onChange={e => handleOtpChange(i, e.target.value)}
+                    onKeyDown={e => handleOtpKey(i, e)}
+                    disabled={loading}
+                    className="w-11 h-12 text-center text-xl font-bold border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all disabled:opacity-50"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {loading && (
+              <div className="flex items-center justify-center gap-2 text-sm text-slate-500">
+                <div className="w-4 h-4 border-2 border-slate-300 border-t-blue-600 rounded-full animate-spin" />Verifying…
+              </div>
+            )}
+            {otpErr && <div className="bg-rose-50 border border-rose-200 text-rose-700 text-sm px-4 py-3 rounded-xl text-center">{otpErr}</div>}
+
+            <div className="text-center text-sm text-slate-500">
+              Didn't receive it?{' '}
+              {canResend
+                ? <button onClick={() => sendOtp()} className="text-blue-600 font-semibold hover:underline">Resend OTP</button>
+                : <span className="text-slate-400">Resend in 30s</span>}
+            </div>
+            <p className="text-xs text-slate-400 text-center">Valid for 10 minutes · Do not share with anyone</p>
+          </div>
+        )}
 
         <div className="mt-5 pt-4 border-t border-slate-100">
           <p className="text-center text-sm text-slate-500">
@@ -204,7 +255,6 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Trust badges */}
         <div className="flex items-center justify-center gap-4 mt-4">
           {['100% Free', 'DPDP Compliant', 'UGC Verified Colleges'].map(b => (
             <div key={b} className="flex items-center gap-1 text-[10px] text-slate-400">
