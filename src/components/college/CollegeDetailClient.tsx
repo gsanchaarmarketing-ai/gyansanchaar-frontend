@@ -332,7 +332,9 @@ export default function CollegeDetailClient({ college, content = {} }: { college
                         <div key={key} className={`flex items-center gap-3 rounded-xl p-3.5 border ${available ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200'}`}>
                           <Icon className={`w-4 h-4 shrink-0 ${available ? 'text-emerald-600' : 'text-slate-400'}`} />
                           <div>
-                            <div className={`text-xs font-semibold capitalize ${available ? 'text-emerald-800' : 'text-slate-500'}`}>{key.replace(/_/g, ' ')}</div>
+                            <div className={`text-xs font-semibold capitalize ${available ? 'text-emerald-800' : 'text-slate-500'}`}>
+                            {({'wifi':'Wi-Fi','labs':'Computer Labs','gym':'Gymnasium','cafeteria':'Cafeteria / Mess','transport':'Campus Transport','library':'Library','hostel':'Hostel','sports':'Sports Grounds'} as Record<string,string>)[key] ?? key.replace(/_/g,' ')}
+                          </div>
                             <div className={`text-[10px] font-bold ${available ? 'text-emerald-600' : 'text-slate-400'}`}>{available ? '✓ Available' : '—'}</div>
                           </div>
                         </div>
