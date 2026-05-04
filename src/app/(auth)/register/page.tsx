@@ -201,14 +201,13 @@ export default function RegisterPage() {
                 <input type="email" value={form.email} onChange={f('email')} className={inputCls(errors.email)} placeholder="you@email.com" />
               </Field>
 
-              <Field label="WhatsApp Number *" error={errors.phone}>
+              <Field label="Phone Number *" error={errors.phone}>
                 <div className="flex gap-2">
                   <div className="flex items-center px-3.5 bg-slate-50 border-2 border-slate-200 rounded-2xl text-sm text-slate-500 shrink-0 font-medium">🇮🇳 +91</div>
                   <input type="tel" value={form.phone} onChange={f('phone')}
                     className={`${inputCls(errors.phone)} flex-1`}
                     placeholder="10-digit number" maxLength={10} inputMode="numeric" />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">Admission updates via WhatsApp</p>
               </Field>
 
               <Field label="Date of Birth (optional)">

@@ -56,7 +56,7 @@ export default async function DashboardPage() {
 
   if (!profile) redirect('/login')
 
-  // Profile complete = has father_name + address (phone_verify optional until WhatsApp live)
+  // Profile complete = has father_name + address
   const profileComplete = !!(profile.father_name && profile.address)
   const isMinorPending  = profile.is_minor && !profile.parental_consent_verified
 

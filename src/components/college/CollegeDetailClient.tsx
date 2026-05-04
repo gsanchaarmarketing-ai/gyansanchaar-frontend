@@ -680,7 +680,7 @@ export default function CollegeDetailClient({ college, content = {} }: { college
             <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5">
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Why Apply via GyanSanchaar?</div>
               <div className="space-y-2">
-                {['Completely free — always', 'UGC-recognised colleges only', 'DPDP Act 2023 compliant', 'One profile, unlimited applications', 'WhatsApp + email status updates'].map(t => (
+                {['Completely free — always', 'UGC-recognised colleges only', 'DPDP Act 2023 compliant', 'One profile, unlimited applications', 'Email status updates'].map(t => (
                   <div key={t} className="flex items-center gap-2 text-xs text-slate-600">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />{t}
                   </div>

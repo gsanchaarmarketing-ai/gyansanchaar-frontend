@@ -201,18 +201,8 @@ export default function ApplicationWizard({ user, states, courses }: Props) {
           <h2 className="font-bold text-heading">Confirm your details</h2>
           <div className="space-y-3 text-sm">
             <div><span className="text-muted">Name:</span> <strong>{user.name}</strong></div>
-            <div>
-              <span className="text-muted">Phone (WhatsApp):</span> <strong>+91 {user.phone}</strong>{' '}
-              {user.phone_verified_at
-                ? <span className="text-success text-xs">✓ Verified</span>
-                : <span className="text-warning text-xs">⚠ Not verified</span>}
-            </div>
+            <div><span className="text-muted">Phone:</span> <strong>+91 {user.phone}</strong></div>
           </div>
-          {!user.phone_verified_at && (
-            <div className="bg-warning/10 border border-warning/30 rounded-xl p-3 text-xs text-body">
-              Please verify your phone number first via the Profile page to receive WhatsApp updates on your applications.
-            </div>
-          )}
           <button onClick={handleStep1}
             className="w-full bg-primary text-white py-3 rounded-xl font-semibold hover:bg-primary-hover transition-colors">
             This is correct — Continue
