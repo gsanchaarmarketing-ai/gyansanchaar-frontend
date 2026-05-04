@@ -56,6 +56,12 @@ export default async function AdminStudentsPage({
   if (verifiedFilter === 'email') students = students.filter(s => !!s.email_confirmed_at)
   if (verifiedFilter === 'unverified') students = students.filter(s => !s.email_confirmed_at)
 
+  // Counselling session count
+  const { count: counsellingCount } = await sb
+    .from('bookings')
+    .select('id', { count: 'exact', head: true })
+    .is('deleted_at', null)
+
   const total     = profiles?.length ?? 0
   const emailVerified = Object.values(authMap).filter(a => a.email_confirmed_at).length
   const phoneVerified = (profiles ?? []).filter(p => p.phone_verified_at).length
@@ -78,10 +84,10 @@ export default async function AdminStudentsPage({
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: 'Total',           value: total,         color: 'text-white'         },
-          { label: 'Email Verified',  value: emailVerified, color: 'text-emerald-400'   },
-          { label: 'Phone Verified',  value: phoneVerified, color: 'text-blue-400'      },
-          { label: 'Unverified',      value: total - emailVerified, color: 'text-amber-400' },
+          { label: 'Total',           value: total,                    color: 'text-white'         },
+          { label: 'Email Verified',  value: emailVerified,            color: 'text-emerald-400'   },
+          { label: 'Phone Verified',  value: phoneVerified,            color: 'text-blue-400'      },
+          { label: 'Sessions Booked', value: counsellingCount ?? 0,    color: 'text-purple-400'    },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-white/4 border border-white/8 rounded-xl p-4">
             <div className={`text-2xl font-bold ${color}`}>{value}</div>

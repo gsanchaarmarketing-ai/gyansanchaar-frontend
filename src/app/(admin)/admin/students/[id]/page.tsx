@@ -44,6 +44,14 @@ export default async function StudentDetailPage({ params }: { params: { id: stri
     .eq('student_id', params.id)
     .order('created_at', { ascending: false })
 
+  // Counselling bookings
+  const { data: bookings } = await sb
+    .from('bookings')
+    .select('id,date,start_time,end_time,status,meeting_platform,meeting_link,student_notes,counsellor_notes,counsellor_summary,student_rating,cancellation_reason,created_at,colleges(name),counsellors(name)')
+    .eq('user_id', params.id)
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false })
+
   // Consent records
   const { data: consents } = await sb
     .from('consent_records')
@@ -100,6 +108,78 @@ export default async function StudentDetailPage({ params }: { params: { id: stri
                 <div className="text-[10px] text-white/25 uppercase tracking-wider mb-1">Address</div>
                 <div className="text-sm text-white/60">{profile.address}</div>
               </div>
+            )}
+          </div>
+
+          {/* Counselling Sessions */}
+          <div className="bg-white/4 border border-white/8 rounded-2xl p-6">
+            <h2 className="text-xs font-bold text-white/30 uppercase tracking-wider mb-4">
+              Counselling Sessions ({bookings?.length ?? 0})
+            </h2>
+            {bookings?.length ? (
+              <div className="space-y-3">
+                {bookings.map((b: any) => {
+                  const statusColor =
+                    b.status === 'completed'  ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20' :
+                    b.status === 'confirmed'  ? 'bg-blue-500/15 text-blue-400 border-blue-500/20' :
+                    b.status === 'cancelled'  ? 'bg-red-500/15 text-red-400 border-red-500/20' :
+                    'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                  return (
+                    <div key={b.id} className="bg-white/3 border border-white/8 rounded-xl p-4 space-y-3">
+                      {/* Top row */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-sm font-semibold text-white/80">
+                            {b.colleges?.name ?? 'General Counselling'}
+                          </div>
+                          <div className="text-xs text-white/30 mt-0.5">
+                            {b.counsellors?.name ? `with ${b.counsellors.name}` : 'Counsellor not assigned'}
+                          </div>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full border capitalize shrink-0 ${statusColor}`}>
+                          {b.status}
+                        </span>
+                      </div>
+
+                      {/* Date & time */}
+                      <div className="flex flex-wrap gap-3 text-xs text-white/40">
+                        <span>📅 {b.date ? new Date(b.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</span>
+                        {b.start_time && <span>🕐 {b.start_time.slice(0, 5)} – {b.end_time?.slice(0, 5) ?? '?'}</span>}
+                        {b.meeting_platform && <span>📹 {b.meeting_platform}</span>}
+                        {b.student_rating && <span>⭐ {b.student_rating}/5</span>}
+                      </div>
+
+                      {/* Notes */}
+                      {b.student_notes && (
+                        <div className="bg-white/3 rounded-lg px-3 py-2">
+                          <div className="text-[10px] text-white/25 uppercase tracking-wider mb-0.5">Student notes</div>
+                          <div className="text-xs text-white/50">{b.student_notes}</div>
+                        </div>
+                      )}
+                      {b.counsellor_summary && (
+                        <div className="bg-blue-500/5 border border-blue-500/15 rounded-lg px-3 py-2">
+                          <div className="text-[10px] text-blue-400/60 uppercase tracking-wider mb-0.5">Counsellor summary</div>
+                          <div className="text-xs text-white/50">{b.counsellor_summary}</div>
+                        </div>
+                      )}
+                      {b.cancellation_reason && (
+                        <div className="bg-red-500/5 border border-red-500/15 rounded-lg px-3 py-2">
+                          <div className="text-[10px] text-red-400/60 uppercase tracking-wider mb-0.5">Cancellation reason</div>
+                          <div className="text-xs text-white/50">{b.cancellation_reason}</div>
+                        </div>
+                      )}
+                      {b.meeting_link && b.status === 'confirmed' && (
+                        <a href={b.meeting_link} target="_blank" rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 transition-colors">
+                          🔗 Join meeting link
+                        </a>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="text-white/20 text-sm">No counselling sessions booked</p>
             )}
           </div>
 
