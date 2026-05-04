@@ -469,54 +469,6 @@ export default function CollegeDetailClient({ college, content = {} }: { college
                 }
               </section>
 
-              {/* Fee table */}
-              {courses.some((c: any) => c.pivot?.fee || c.default_fee) && (
-                <section className="bg-white rounded-2xl p-6 md:p-8 border border-slate-200 shadow-sm">
-                  <h2 className="text-xl font-bold text-slate-900 mb-5">Fee Structure</h2>
-                  <div className="overflow-x-auto rounded-xl border border-slate-200">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="bg-slate-50 border-b border-slate-200">
-                          <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Programme</th>
-                          <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Level</th>
-                          <th className="text-left px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Duration</th>
-                          <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Annual Fee</th>
-                          <th className="text-right px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Total Fee</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {courses.map((c: any) => {
-                          const fee = c.pivot?.fee ?? c.default_fee ?? 0
-                          const yrs = Math.ceil((c.duration_months ?? 24) / 12)
-                          return (
-                            <tr key={c.id} className="hover:bg-slate-50 transition-colors">
-                              <td className="px-4 py-3">
-                                <div className="font-medium text-slate-900">{c.name}</div>
-                                {c.pivot?.branches && <div className="text-xs text-slate-400 mt-0.5">{c.pivot.branches}</div>}
-                              </td>
-                              <td className="px-4 py-3 hidden md:table-cell">
-                                <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{c.level}</span>
-                              </td>
-                              <td className="px-4 py-3 text-slate-500 hidden md:table-cell">{yrs} yr{yrs > 1 ? 's' : ''}</td>
-                              <td className="px-4 py-3 text-right text-slate-600">{fee ? `₹${fmt(fee)}` : '—'}</td>
-                              <td className="px-4 py-3 text-right font-bold text-slate-900">{fee ? `₹${fmt(fee * yrs)}` : '—'}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                  {college.fee_notes && (
-                    <div className="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-4">
-                      <div className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-1.5">Additional Information</div>
-                      {college.fee_notes.trim().startsWith('<')
-                        ? <div className="prose prose-sm max-w-none text-slate-600" dangerouslySetInnerHTML={{ __html: college.fee_notes }} />
-                        : <p className="text-sm text-slate-600 leading-relaxed">{college.fee_notes}</p>}
-                    </div>
-                  )}
-                  <p className="text-xs text-slate-400 mt-3">* Fees shown are indicative. Verify directly with the college before applying. Scholarship and category discounts may apply.</p>
-                </section>
-              )}
             </>
           )}
 

@@ -29,8 +29,8 @@ export default function FirstVisitModal({ profileComplete }: { profileComplete: 
         </div>
 
         {/* What's needed */}
-        <div className="p-6">
-          <div className="space-y-2.5 mb-5">
+        <div className="p-6 pb-8">
+          <div className="space-y-3 mb-5">
             {[
               "Father's name & alternate contact",
               'Email ID & complete address',
@@ -50,11 +50,11 @@ export default function FirstVisitModal({ profileComplete }: { profileComplete: 
 
           <div className="flex gap-3">
             <button onClick={() => setOpen(false)}
-              className="flex-1 border border-slate-200 text-slate-500 py-2.5 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
+              className="flex-1 border border-slate-200 text-slate-500 py-3 rounded-xl text-sm font-medium hover:bg-slate-50 transition-colors">
               Later
             </button>
             <Link href="/dashboard/application" onClick={() => setOpen(false)}
-              className="flex-1 bg-blue-600 text-white py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-blue-700 transition-colors">
+              className="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-1.5 hover:bg-blue-700 transition-colors">
               Complete Now <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
