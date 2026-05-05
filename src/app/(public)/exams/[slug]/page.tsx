@@ -1,3 +1,4 @@
+import { getAdmissionYear } from '@/lib/admission-year'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getExamBySlug } from '@/lib/supabase-api'
@@ -15,9 +16,9 @@ export const revalidate = 3600
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
     const exam = await getExamBySlug(params.slug)
-    const desc = `${exam.name} ${new Date().getFullYear()} — eligibility, exam dates, pattern and preparation tips.`
+    const desc = `${exam.name} ${getAdmissionYear()} — eligibility, exam dates, pattern and preparation tips.`
     return {
-      title: `${exam.name} ${new Date().getFullYear()} — Dates, Eligibility, Pattern | GyanSanchaar`,
+      title: `${exam.name} ${getAdmissionYear()} — Dates, Eligibility, Pattern | GyanSanchaar`,
       description: desc,
       alternates: { canonical: `/exams/${exam.slug}` },
       openGraph: { title: exam.name, description: desc },

@@ -1,3 +1,4 @@
+import { getAdmissionYear } from '@/lib/admission-year'
 import type { Metadata } from 'next'
 import { getExams } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
@@ -6,7 +7,7 @@ import Link from 'next/link'
 import { Calendar, ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: `Entrance Exam Calendar ${new Date().getFullYear()} — JEE, NEET, CAT, CLAT, GATE | GyanSanchaar`,
+  title: `Entrance Exam Calendar ${getAdmissionYear()} — JEE, NEET, CAT, CLAT, GATE | GyanSanchaar`,
   description: 'JEE, NEET, CAT, CLAT, GATE and 50+ entrance exams — dates, registration deadlines, eligibility and results in one place.',
   alternates: { canonical: '/exams' },
 }

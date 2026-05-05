@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { getAdmissionSession, getAdmissionYear } from '@/lib/admission-year'
 import { getColleges, getStates, getStreams } from '@/lib/supabase-api'
 import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
@@ -21,7 +22,7 @@ export async function generateMetadata({
     : page > 1 ? `/colleges?page=${page}` : '/colleges'
 
   return {
-    title: `Colleges in India ${new Date().getFullYear()} — Filter by State, Type, NIRF Rank | GyanSanchaar`,
+    title: `Colleges in India ${getAdmissionYear()} — Filter by State, Type, NIRF Rank | GyanSanchaar`,
     description: 'Browse and compare 500+ verified colleges across India. Filter by state, type, NIRF rank, and stream. Apply directly — zero agent fees.',
     alternates: { canonical: canonicalUrl },
     openGraph: {

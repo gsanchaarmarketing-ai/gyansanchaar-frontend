@@ -1,3 +1,4 @@
+import { getAdmissionYear } from '@/lib/admission-year'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -19,7 +20,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     const fees = c.fee_min && c.fee_max
       ? `₹${Math.round(c.fee_min / 1000)}K–${Math.round(c.fee_max / 1000)}K/yr`
       : c.default_fee ? `₹${Math.round((c.default_fee as number) / 1000)}K/yr` : 'varies'
-    const title = `${c.name} ${new Date().getFullYear()} — Fees, Eligibility, Colleges | GyanSanchaar`
+    const title = `${c.name} ${getAdmissionYear()} — Fees, Eligibility, Colleges | GyanSanchaar`
     const description = `${c.name} (${c.level?.toUpperCase()}) — ${Math.ceil((c.duration_months ?? 24) / 12)} years. Average fees ${fees}. ${c.description ?? 'Apply to top colleges free on GyanSanchaar.'}`
     return {
       title, description,

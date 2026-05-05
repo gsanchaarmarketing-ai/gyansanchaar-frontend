@@ -7,6 +7,7 @@ import Header from '@/components/layout/Header'
 import MobileNav from '@/components/layout/MobileNav'
 import CollegeDetailClient from '@/components/college/CollegeDetailClient'
 import GoogleReviewsCarousel from '@/components/college/GoogleReviewsCarousel'
+import { getAdmissionSession, getAdmissionYear } from '@/lib/admission-year'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,8 +19,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   try {
     const c = await getCollegeBySlug(params.slug)
     if (!c) return { title: 'College | GyanSanchaar' }
-    const year  = new Date().getFullYear()
-    const title = `${c.name} — Admissions ${year}, Courses & Fees | GyanSanchaar`
+    const session = getAdmissionSession()
+    const year    = getAdmissionYear()
+    const title = `${c.name} — Admissions ${session}, Courses & Fees | GyanSanchaar`
     const desc  = [
       `${c.name} in ${c.city}${c.state ? ', ' + c.state.name : ''}.`,
       c.nirf_rank  ? `NIRF Rank ${c.nirf_rank}.` : '',

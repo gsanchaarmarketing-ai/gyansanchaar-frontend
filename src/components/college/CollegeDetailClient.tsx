@@ -155,6 +155,7 @@ export default function CollegeDetailClient({ college, content = {} }: { college
   const pd = college.placement_data ?? {}
   const hi = college.hostel_info ?? {}
   const year = new Date().getFullYear()
+  const session = `${year}–${String(year + 1).slice(-2)}`
 
   const about = college.about?.trim() || generateAbout(college)
 
@@ -278,7 +279,7 @@ export default function CollegeDetailClient({ college, content = {} }: { college
 
                 {/* Admission note */}
                 <div className="mt-6 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm text-blue-800">
-                  <strong>Applying for {year}–{year + 1}?</strong> Submit your application directly through GyanSanchaar — completely free, no agent fees, no hidden charges.
+                  <strong>Applying for {session}?</strong> Submit your application directly through GyanSanchaar — completely free, no agent fees, no hidden charges.
                 </div>
               </section>
 
@@ -437,7 +438,7 @@ export default function CollegeDetailClient({ college, content = {} }: { college
                 <h2 className="text-xl font-bold text-slate-900 mb-2">Courses Offered at {college.name}</h2>
                 <p className="text-sm text-slate-500 mb-6">
                   {courses.length
-                    ? `${courses.length} programmes available for {year}–${year + 1} admissions. Click "Apply Free" to apply to any course at no cost.`
+                    ? `${courses.length} programmes available for ${session} admissions. Click "Apply Free" to apply to any course at no cost.`
                     : 'Course information not yet available.'}
                 </p>
 

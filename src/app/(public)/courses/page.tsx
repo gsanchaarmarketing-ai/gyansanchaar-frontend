@@ -1,3 +1,4 @@
+import { getAdmissionYear } from '@/lib/admission-year'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -11,7 +12,7 @@ const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://gyansanchaar.com'
 export async function generateMetadata({ searchParams }: { searchParams: Record<string, string> }): Promise<Metadata> {
   const page = Number(searchParams.page ?? 1)
   return {
-    title: `Courses in India ${new Date().getFullYear()} — UG, PG, Diploma | GyanSanchaar`,
+    title: `Courses in India ${getAdmissionYear()} — UG, PG, Diploma | GyanSanchaar`,
     description: 'Explore UG, PG, diploma and certificate courses across all streams. View fees, duration, eligibility and apply to colleges across Northeast India.',
     alternates: { canonical: page > 1 ? `/courses?page=${page}` : '/courses' },
     openGraph: { title: 'Courses in India | GyanSanchaar', url: `${BASE}/courses` },
